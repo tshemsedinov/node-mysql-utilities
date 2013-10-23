@@ -1,0 +1,24 @@
+{
+  "name": "mysql-utilities",
+  "version": "0.0.1",
+  "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
+  "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
+  "keywords": [
+    "mysql",
+    "utilities",
+    "introspection",
+    "impress"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tshemsedinov/node-mysql-utilities"
+  },
+  "main": "./utilities",
+  "dependencies": {
+	"mysql": "2.0.x"
+  },
+  "engines": {
+    "node": ">=0.10.6"
+  },
+  "readmeFilename": "README.md"
+}
