@@ -44,32 +44,35 @@ $ npm install mysql-utilities
   Utilities can be attached to connection using mix-ins:
 
 ```js
-	// Library dependencies
-	var mysql = require('mysql'),
-		mysqlUtilities = require('utilities');
+// Library dependencies
+var mysql = require('mysql'),
+	mysqlUtilities = require('utilities');
 
-	var connection = mysql.createConnection({
-		host:     'localhost',
-		user:     'userName',
-		password: 'secret',
-		database: 'databaseName'
-	});
+var connection = mysql.createConnection({
+	host:     'localhost',
+	user:     'userName',
+	password: 'secret',
+	database: 'databaseName'
+});
 
-	connection.connect();
+connection.connect();
 
-	// Mix-in for Data Access Methods and SQL Autogenerating Methods
-	mysqlUtilities.upgrade(connection);
+// Mix-in for Data Access Methods and SQL Autogenerating Methods
+mysqlUtilities.upgrade(connection);
 
-	// Mix-in for Introspection Methods
-	mysqlUtilities.introspection(connection);
+// Mix-in for Introspection Methods
+mysqlUtilities.introspection(connection);
 
-	// Do something using utilities
-	connection.queryRow('SELECT * FROM _Language where LanguageId=?', [3], function(err, row) {
+// Do something using utilities
+connection.queryRow(
+	'SELECT * FROM _Language where LanguageId=?', [3],
+	function(err, row) {
 		console.dir({queryRow:row});
-	});
+	}
+);
 
-	// Release connection
-	connection.end();
+// Release connection
+connection.end();
 ```
 
 ## Contributors
