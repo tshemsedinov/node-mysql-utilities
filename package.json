@@ -1,6 +1,6 @@
 {
   "name": "mysql-utilities",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
   "keywords": [

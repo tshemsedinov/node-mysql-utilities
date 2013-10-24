@@ -13,7 +13,7 @@ $ npm install mysql-utilities
   - MySQL Data Access Methods
     - Query selecting single row: connection.queryRow(sql, values, callback)
     - Query selecting scalar (single value): connection.queryValue(sql, values, callback)
-    - Query selecting column into array: connection.queryArray(sql, values, callback)
+    - Query selecting column into array: connection.queryCol(sql, values, callback)
     - Query selecting hash of records: connection.queryHash(sql, values, callback)
     - Query selecting key/value hash: connection.queryKeyValue(sql, values, callback)
   - MySQL Introspection Methods

@@ -279,7 +279,7 @@ module.exports = {
 		//   callback(err, databases)
 		//
 		connection.databases = function(callback) {
-			this.queryArray('SHOW DATABASES', [], function(err, res) {
+			this.queryCol('SHOW DATABASES', [], function(err, res) {
 				if (err) res = false;
 				callback(err, res);
 			});

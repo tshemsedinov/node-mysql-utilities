@@ -53,8 +53,8 @@ connection.queryHash('SELECT LanguageSign,LanguageId,LanguageName,Caption,Langua
 	console.dir({queryHash:arr});
 });
 
-connection.queryArray('SELECT LanguageSign FROM _Language', [], function(err, arr) {
-	console.dir({queryArray:arr});
+connection.queryCol('SELECT LanguageSign FROM _Language', [], function(err, arr) {
+	console.dir({queryCol:arr});
 });
 
 connection.queryKeyValue('SELECT LanguageISO,LanguageName FROM _Language', [], function(err, keyValue) {
