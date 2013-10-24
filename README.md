@@ -1,7 +1,5 @@
 ![impress logo](http://habrastorage.org/storage3/747/830/b17/747830b1782bd95f28b8d05eff8e05d9.jpg)
 
-# Impress
-
 [Utilities](https://github.com/tshemsedinov/node-mysql-utilities) [node-mysql driver](https://github.com/felixge/node-mysql) with specialized result types, introspection and other helpful functionality. for [node.js](http://nodejs.org). All decisions are made. Ready for applied development.
 
 ## Installation

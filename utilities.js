@@ -74,9 +74,9 @@ module.exports = {
 			});
 		}
 
-		// Query returning array of first field values
+		// Query returning array of column field values
 		//
-		connection.queryArray = function(sql, values, callback) {
+		connection.queryCol = function(sql, values, callback) {
 			return this.query(sql, values, function(err, res, fields) {
 				var result = [];
 				if (err) result = false; else {
