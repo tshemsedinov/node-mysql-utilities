@@ -1,3 +1,10 @@
+0.0.4 / 2013-10-26
+==================
+
+  * Added event to catch any query execution: connection.on('query', function(err, query) {});
+  * Added event to catch slow query execution: connection.on('slow', function(err, executionTime, query) {});
+  * Added connection parameter: connection.slowTime in milliseconds, default value is 2000
+
 0.0.3 / 2013-10-24
 ==================
 

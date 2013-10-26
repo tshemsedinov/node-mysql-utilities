@@ -13,6 +13,16 @@ connection.connect();
 mysqlUtilities.upgrade(connection);
 mysqlUtilities.introspection(connection);
 
+connection.slowTime = 100; // ms
+
+connection.on('query', function(err, res, fields, query) {
+	console.dir({onQuery:{err:err, query:query.sql}});
+});
+
+connection.on('slow', function(err, res, fields, query, executionTime) {
+	console.dir({onSlow:{err:err, executionTime:executionTime, query:query.sql}});
+});
+
 console.log({
 	where: connection.where({ id: 5, year: ">2010", price: "100..200", level: "<=3", sn: "*str?", label: "str", code: "(1,2,4,10,11)" })
 });
@@ -89,7 +99,7 @@ connection.tables(function(err, tables) {
 	console.dir({tables:tables});
 });
 
-connection.databaseTables(database, function(err, tables) {
+connection.databaseTables('mezha', function(err, tables) {
 	console.dir({tables:tables});
 });
 

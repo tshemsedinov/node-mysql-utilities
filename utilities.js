@@ -10,10 +10,34 @@ var startsWith = function(value, str) {
 	return value.slice(0, str.length) == str;
 };
 
+if (typeof(Function.prototype.override) != 'function') {
+	Function.prototype.override = function(fn) {
+		var superFunction = this;
+		return function() {
+			this.inherited = superFunction;
+			return fn.apply(this, arguments);
+		}
+	}
+}
+
 module.exports = {
 
 	upgrade: function(connection) {
 
+		connection.slowTime = 2000;
+
+		connection.query = connection.query.override(function(sql, values, callback) {
+			var startTime = new Date().getTime();
+			var query = this.inherited(sql, values, function(err, res, fields) {
+				var endTime = new Date().getTime(),
+					executionTime = endTime-startTime;
+				connection.emit('query', err, res, fields, query);
+				if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
+				callback(err, res, fields);
+			});
+			return query;
+		});
+		
 		// Where clause builder
 		//   Example: { id: 5, year: ">2010", price: "100..200", level: "<=3", sn: "*str?", label: "str", code: "(1,2,4,10,11)" }
 		//   Returns: "id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)"

@@ -37,6 +37,9 @@ $ npm install mysql-utilities
     - Inserting or selecting record: connection.upsert(table, row, callback)
     - Count records with filter: connection.count(table, whereFilter, callback)
     - Delete record(s): connection.delete(table, whereFilter, callback)
+  - Events
+    - Catch any query execution: connection.on('query', function(err, res, fields, query) {});
+    - Catch slow query execution: connection.on('slow', function(err, res, fields, query, executionTime) {});
 
 ## Initialization
 
