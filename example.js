@@ -3,9 +3,9 @@ var mysqlUtilities = require('./utilities');
 
 var connection = mysql.createConnection({
 	host:     'localhost',
-	user:     'mezha',
-	password: 'mezhanet',
-	database: 'mezha'
+	user:     'userName',
+	password: 'userPassword',
+	database: 'databaseName'
 });
 
 connection.connect();
@@ -86,6 +86,10 @@ connection.databases(function(err, databases) {
 });
 
 connection.tables(function(err, tables) {
+	console.dir({tables:tables});
+});
+
+connection.databaseTables(database, function(err, tables) {
 	console.dir({tables:tables});
 });
 
