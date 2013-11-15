@@ -148,7 +148,7 @@ module.exports = {
 		connection.select = function(table, fields, where, callback) {
 			var where = this.where(where),
 				sql = 'SELECT '+fields+' FROM '+escapeIdentifier(table);
-			if (where)  sql = sql+ ' WHERE '+where;
+			if (where) sql = sql+ ' WHERE '+where;
 			var query = this.query(sql, [], function(err, res) {
 				callback(err, res, query);
 			});
@@ -203,7 +203,11 @@ module.exports = {
 						var query = dbc.query('UPDATE '+escapeIdentifier(table)+' SET '+data+' WHERE '+where, [], function(err, res) {
 							callback(err, res ? res.changedRows : false, query);
 						});
-					} else callback(new Error('Error: can not insert into "'+table+'" because there is no primary or unique key specified'), false);
+					} else {
+						var e = new Error('Error: can not insert into "'+table+'" because there is no primary or unique key specified');
+						dbc.emit('error', e);
+						callback(e, false);
+					}
 				} else callback(new Error('Error: Table "'+table+'" not found'), false);
 			});
 		}
@@ -226,7 +230,11 @@ module.exports = {
 							if (count==1) dbc.update(table, row, callback);
 							else dbc.insert(table, row, callback);
 						});
-					} else callback(new Error('Error: can not insert of update table "'+table+'", primary or unique key is not specified'), false);
+					} else {
+						var e = new Error('Error: can not insert or update table "'+table+'", primary or unique key is not specified');
+						dbc.emit('error', e);
+						callback(e, false);
+					}
 				} else callback(new Error('Error: Table "'+table+'" not found'), false);
 			});
 		}
@@ -235,10 +243,17 @@ module.exports = {
 		//   callback(err, rowCount or false)
 		//
 		connection.delete = function(table, where, callback) {
-			var where = this.where(where);
-			if (where) var query = this.query('DELETE FROM '+escapeIdentifier(table)+' WHERE '+where, [], function(err, res) {
-				callback(err, res ? res.affectedRows : false, query);
-			}); else callback(new Error('Error: can not delete from "'+table+'", because "where" parameter is empty'), false);
+			var dbc = this,
+				where = this.where(where);
+			if (where) {
+				var query = dbc.query('DELETE FROM '+escapeIdentifier(table)+' WHERE '+where, [], function(err, res) {
+					callback(err, res ? res.affectedRows : false, query);
+				});
+			} else {
+				var e = new Error('Error: can not delete from "'+table+'", because "where" parameter is empty');
+				dbc.emit('error', e);
+				callback(e, false);
+			}
 		}
 
 	},

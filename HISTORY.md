@@ -1,3 +1,9 @@
+1.0.1 / 2013-11-15
+==================
+
+  * Emit 'error' event into connection
+  * Added documentation into Readme
+
 0.0.4 / 2013-10-26
 ==================
 
