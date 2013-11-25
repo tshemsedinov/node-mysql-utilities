@@ -1,3 +1,8 @@
+1.0.2 / 2013-11-26
+==================
+
+  * Parameter "value" turned into optional in query, queryRow, queryValue, queryCol, queryHash, queryKeyValue
+
 1.0.1 / 2013-11-15
 ==================
 

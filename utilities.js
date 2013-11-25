@@ -28,6 +28,10 @@ module.exports = {
 
 		connection.query = connection.query.override(function(sql, values, callback) {
 			var startTime = new Date().getTime();
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			var query = this.inherited(sql, values, function(err, res, fields) {
 				var endTime = new Date().getTime(),
 					executionTime = endTime-startTime;
@@ -83,6 +87,10 @@ module.exports = {
 		// Returns single row as associative array of fields
 		//
 		connection.queryRow = function(sql, values, callback) {
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			return this.query(sql, values, function(err, res, fields) {
 				if (err) res = false; else res = res[0] ? res[0] : false;
 				callback(err, res, fields);
@@ -92,6 +100,10 @@ module.exports = {
 		// Returns single value (scalar)
 		//
 		connection.queryValue = function(sql, values, callback) {
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			return this.queryRow(sql, values, function(err, res, fields) {
 				if (err) res = false; else res = res[Object.keys(res)[0]];
 				callback(err, res, fields);
@@ -101,6 +113,10 @@ module.exports = {
 		// Query returning array of column field values
 		//
 		connection.queryCol = function(sql, values, callback) {
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			return this.query(sql, values, function(err, res, fields) {
 				var result = [];
 				if (err) result = false; else {
@@ -116,6 +132,10 @@ module.exports = {
 		// Query returning hash (associative array), first field will be array key
 		//
 		connection.queryHash = function(sql, values, callback) {
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			return this.query(sql, values, function(err, res, fields) {
 				var result = {};
 				if (err) result = false; else {
@@ -131,6 +151,10 @@ module.exports = {
 		// Query returning key-value array, first field of query will be key and second will be value
 		//
 		connection.queryKeyValue = function(sql, values, callback) {
+			if (typeof(values) == 'function') {
+				callback = values;
+				values = [];
+			}
 			return this.query(sql, values, function(err, res, fields) {
 				var result = {};
 				if (err) result = false; else {
