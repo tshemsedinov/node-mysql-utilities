@@ -33,7 +33,7 @@ $ npm install mysql-utilities
   - MySQL SQL Statements Autogenerating Methods
     - Selecting record(s): connection.select(table, whereFilter, callback)
     - Inserting record: connection.insert(table, row, callback)
-    - Updating record: connection.update(table, row, callback)
+    - Updating record: connection.update(table, row, where, callback)
     - Inserting or selecting record: connection.upsert(table, row, callback)
     - Count records with filter: connection.count(table, whereFilter, callback)
     - Delete record(s): connection.delete(table, whereFilter, callback)
@@ -594,6 +594,18 @@ connection.update('Language', {
 }, function(err, affectedRows) {
 	console.dir({update:affectedRows});
 });
+```
+
+Generate UPDATE statement with "where": connection.update(table, row, where, callback)
+```js
+connection.update(
+	'Language',
+	{ LanguageSign:'TT' },
+	{ LanguageId: 1 },
+	function(err, affectedRows) {
+		console.dir({update:affectedRows});
+	}
+);
 ```
 
 Generate INSERT statement if record not exists or UPDATE if it exists: connection.upsert(table, row, callback)

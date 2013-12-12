@@ -1,3 +1,8 @@
+1.0.3 / 2013-12-12
+==================
+
+  * Improved connection.update(table, row, where, callback), "where" is optional parameter, see examples
+
 1.0.2 / 2013-11-26
 ==================
 

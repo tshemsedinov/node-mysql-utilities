@@ -207,33 +207,50 @@ module.exports = {
 
 		// UPDATE SQL statement generator
 		//
-		connection.update = function(table, row, callback) {
+		connection.update = function(table, row, where, callback) {
 			var dbc = this;
-			dbc.fields(table, function(err, fields) {
-				if (!err) {
-					var where = '',
-						data = [],
-						rowKeys = Object.keys(row);
-					for (var i in fields) {
-						var field = fields[i],
-							fieldName = field['Field'];
-						if (rowKeys.indexOf(fieldName)!=-1) {
-							if (!where && (field['Key']=='PRI' || field['Key']=='UNI')) where = fieldName+'='+dbc.escape(row[fieldName]);
-							else data.push(fieldName+'='+dbc.escape(row[fieldName]));
+			if (typeof(where) == 'function') {
+				callback = where;
+				dbc.fields(table, function(err, fields) {
+					if (!err) {
+						var where = '',
+							data = [],
+							rowKeys = Object.keys(row);
+						for (var i in fields) {
+							var field = fields[i],
+								fieldName = field['Field'];
+							if (rowKeys.indexOf(fieldName)!=-1) {
+								if (!where && (field['Key']=='PRI' || field['Key']=='UNI')) where = fieldName+'='+dbc.escape(row[fieldName]);
+								else data.push(fieldName+'='+dbc.escape(row[fieldName]));
+							}
 						}
-					}
-					if (where) {
-						data = data.join(', ');
-						var query = dbc.query('UPDATE '+escapeIdentifier(table)+' SET '+data+' WHERE '+where, [], function(err, res) {
-							callback(err, res ? res.changedRows : false, query);
-						});
-					} else {
-						var e = new Error('Error: can not insert into "'+table+'" because there is no primary or unique key specified');
-						dbc.emit('error', e);
-						callback(e, false);
-					}
-				} else callback(new Error('Error: Table "'+table+'" not found'), false);
-			});
+						if (where) {
+							data = data.join(', ');
+							var query = dbc.query('UPDATE '+escapeIdentifier(table)+' SET '+data+' WHERE '+where, [], function(err, res) {
+								callback(err, res ? res.changedRows : false, query);
+							});
+						} else {
+							var e = new Error('Error: can not insert into "'+table+'" because there is no primary or unique key specified');
+							dbc.emit('error', e);
+							callback(e, false);
+						}
+					} else callback(new Error('Error: Table "'+table+'" not found'), false);
+				});
+			} else {
+				where = this.where(where);
+				if (where) {
+					var data = [];
+					for (var i in row) data.push(i+'='+dbc.escape(row[i]));
+					data = data.join(', ');
+					var query = dbc.query('UPDATE '+escapeIdentifier(table)+' SET '+data+' WHERE '+where, [], function(err, res) {
+						callback(err, res ? res.changedRows : false, query);
+					});
+				} else {
+					var e = new Error('Error: can update "'+table+'", because "where" parameter is empty');
+					dbc.emit('error', e);
+					callback(e, false);
+				}
+			}
 		}
 
 		// INSERT OR UPDATE SQL statement generator

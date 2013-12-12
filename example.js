@@ -39,6 +39,10 @@ connection.update('_Language', {LanguageId: 1, LanguageName:'Qwertian', Language
 	console.dir({update:results, err:err});
 });
 
+connection.update('_Language', {LanguageName:'QwertianA', LanguageSign:'QA'}, {LanguageId: 1}, function(err, results) {
+	console.dir({update:results, err:err});
+});
+
 connection.upsert('_Language', {LanguageId: 1, LanguageName:'Qwertianian', LanguageSign:'QW', LanguageISO:'QW', Caption:'Qwertianian'}, function(err, results) {
 	console.dir({upsert:results, err:err});
 });
