@@ -37,7 +37,7 @@ module.exports = {
 					executionTime = endTime-startTime;
 				connection.emit('query', err, res, fields, query);
 				if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
-				callback(err, res, fields);
+				if (callback) callback(err, res, fields);
 			});
 			return query;
 		});

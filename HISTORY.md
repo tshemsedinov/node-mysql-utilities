@@ -1,3 +1,8 @@
+1.0.4 / 2014-02-08
+==================
+
+  * Added support for streaming query rows, see https://github.com/felixge/node-mysql#streaming-query-rows
+
 1.0.3 / 2013-12-12
 ==================
 
