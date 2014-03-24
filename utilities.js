@@ -32,13 +32,33 @@ module.exports = {
 				callback = values;
 				values = [];
 			}
-			var query = this.inherited(sql, values, function(err, res, fields) {
-				var endTime = new Date().getTime(),
+			if (callback) {
+				var query = this.inherited(sql, values, function(err, res, fields) {
+					var endTime = new Date().getTime(),
 					executionTime = endTime-startTime;
-				connection.emit('query', err, res, fields, query);
-				if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
-				if (callback) callback(err, res, fields);
-			});
+					connection.emit('query', err, res, fields, query);
+					if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
+					callback(err, res, fields);
+				});
+			}
+			else {
+				var res = []
+					, fields
+					, err;
+				var query = this.inherited(sql, values);
+				query.on('error', function (e) {
+					err = e;
+				}).on('fields', function (f) {
+					fields = f;
+				}).on('result', function (r) {
+					res.push(r);
+				}).on('end', function () {
+					var endTime = new Date().getTime()
+						, executionTime = endTime-startTime;
+					connection.emit('query', err, res, fields, query);
+					if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
+				});
+			}
 			return query;
 		});
 		
