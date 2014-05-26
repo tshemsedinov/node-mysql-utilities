@@ -1,3 +1,5 @@
+"use strict";
+
 var identifierRegexp = /^[0-9,a-z,A-Z_\.]*$/;
 
 var escapeIdentifier = function(str, quote) {
@@ -16,8 +18,8 @@ if (typeof(Function.prototype.override) != 'function') {
 		return function() {
 			this.inherited = superFunction;
 			return fn.apply(this, arguments);
-		}
-	}
+		};
+	};
 }
 
 module.exports = {
@@ -59,7 +61,7 @@ module.exports = {
 					else if (startsWith(value, '<>')) clause = key+' <> '+dbc.escape(value.substring(2));
 					else if (startsWith(value, '>' )) clause = key+' > ' +dbc.escape(value.substring(1));
 					else if (startsWith(value, '<' )) clause = key+' < ' +dbc.escape(value.substring(1));
-					else if (startsWith(value, '(' )) clause = key+' IN ('+value.substr(1, value.length-2).split(',').map(function(s) { return dbc.escape(parseInt(s)) }).join(',')+')';
+					else if (startsWith(value, '(' )) clause = key+' IN ('+value.substr(1, value.length-2).split(',').map(function(s) { return dbc.escape(parseInt(s)); }).join(',')+')';
 					else if (value.indexOf('..') !== -1) {
 						value = value.split('..');
 						clause = '('+key+' BETWEEN '+dbc.escape(value[0])+' AND '+dbc.escape(value[1])+')';
@@ -71,18 +73,18 @@ module.exports = {
 				if (result) result = result+' AND '+clause; else result = clause;
 			}
 			return result;
-		}
+		};
 
 		// Record count
 		//
 		connection.count = function(table, where, callback) {
-			var where = this.where(where),
-				sql = 'SELECT count(*) FROM '+escapeIdentifier(table);
+			where = this.where(where);
+			var sql = 'SELECT count(*) FROM '+escapeIdentifier(table);
 			if (where) sql = sql+' WHERE '+where;
 			return this.queryValue(sql, [], function(err, res) {
 				callback(err, res);
 			});
-		}
+		};
 
 		// Returns single row as associative array of fields
 		//
@@ -95,7 +97,7 @@ module.exports = {
 				if (err) res = false; else res = res[0] ? res[0] : false;
 				callback(err, res, fields);
 			});
-		}
+		};
 
 		// Returns single value (scalar)
 		//
@@ -108,7 +110,7 @@ module.exports = {
 				if (err) res = false; else res = res[Object.keys(res)[0]];
 				callback(err, res, fields);
 			});
-		}
+		};
 
 		// Query returning array of column field values
 		//
@@ -127,7 +129,7 @@ module.exports = {
 				}
 				callback(err, result, fields);
 			});
-		}
+		};
 
 		// Query returning hash (associative array), first field will be array key
 		//
@@ -146,7 +148,7 @@ module.exports = {
 				}
 				callback(err, result, fields);
 			});
-		}
+		};
 
 		// Query returning key-value array, first field of query will be key and second will be value
 		//
@@ -165,18 +167,18 @@ module.exports = {
 				}
 				callback(err, result, fields);
 			});
-		}
+		};
 
 		// SELECT SQL statement generator
 		//
 		connection.select = function(table, fields, where, callback) {
-			var where = this.where(where),
-				sql = 'SELECT '+fields+' FROM '+escapeIdentifier(table);
+			where = this.where(where);
+			var sql = 'SELECT '+fields+' FROM '+escapeIdentifier(table);
 			if (where) sql = sql+ ' WHERE '+where;
 			var query = this.query(sql, [], function(err, res) {
 				callback(err, res, query);
 			});
-		}
+		};
 	
 		// INSERT SQL statement generator
 		//   callback(err, id or false)
@@ -203,7 +205,7 @@ module.exports = {
 					});
 				} else callback(new Error('Error: Table "'+table+'" not found'), false);
 			});
-		}
+		};
 
 		// UPDATE SQL statement generator
 		//
@@ -251,7 +253,7 @@ module.exports = {
 					callback(e, false);
 				}
 			}
-		}
+		};
 
 		// INSERT OR UPDATE SQL statement generator
 		//
@@ -278,14 +280,14 @@ module.exports = {
 					}
 				} else callback(new Error('Error: Table "'+table+'" not found'), false);
 			});
-		}
+		};
 
 		// DELETE SQL statement generator
 		//   callback(err, rowCount or false)
 		//
 		connection.delete = function(table, where, callback) {
-			var dbc = this,
-				where = this.where(where);
+			var dbc = this;
+			where = this.where(where);
 			if (where) {
 				var query = dbc.query('DELETE FROM '+escapeIdentifier(table)+' WHERE '+where, [], function(err, res) {
 					callback(err, res ? res.affectedRows : false, query);
@@ -295,7 +297,7 @@ module.exports = {
 				dbc.emit('error', e);
 				callback(e, false);
 			}
-		}
+		};
 
 	},
 
@@ -309,7 +311,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get foreign key metadata
 		//   callback(err, foreign)
@@ -326,7 +328,7 @@ module.exports = {
 					callback(err, res);
 				}
 			);
-		}
+		};
 
 		// Get table constraints metadata
 		//   callback(err, constraints)
@@ -343,7 +345,7 @@ module.exports = {
 					callback(err, res);
 				}
 			);
-		}
+		};
 
 		// Get table fields metadata
 		//   callback(err, fields)
@@ -353,7 +355,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get connection databases array
 		//   callback(err, databases)
@@ -363,7 +365,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get database tables list
 		//   callback(err, tables)
@@ -379,7 +381,7 @@ module.exports = {
 					callback(err, res);
 				}
 			);
-		}
+		};
 
 		// Get current database table metadata
 		//   callback(err, tables)
@@ -395,7 +397,7 @@ module.exports = {
 					callback(err, res);
 				}
 			);
-		}
+		};
 
 		// Get table metadata info
 		//   callback(err, metadata)
@@ -405,7 +407,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get table indexes metadata
 		//   callback(err, indexes)
@@ -421,7 +423,7 @@ module.exports = {
 				}
 				callback(err, result);
 			});
-		}
+		};
 
 		// Get server process list
 		//   callback(err, processes)
@@ -431,7 +433,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get server global variables
 		//   callback(err, variables)
@@ -441,7 +443,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get server global status
 		//   callback(err, status)
@@ -451,7 +453,7 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 		// Get database users
 		//   callback(err, users)
@@ -461,8 +463,8 @@ module.exports = {
 				if (err) res = false;
 				callback(err, res);
 			});
-		}
+		};
 
 	}
 
-}
+};

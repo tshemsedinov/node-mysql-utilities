@@ -1,4 +1,6 @@
-﻿var mysql = require('mysql');
+﻿"use strict";
+
+var mysql = require('mysql');
 var mysqlUtilities = require('./utilities');
 
 var connection = mysql.createConnection({

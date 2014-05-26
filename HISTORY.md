@@ -1,3 +1,9 @@
+1.0.5 / 2014-05-26
+==================
+
+  * Added "use strict";
+  * Some code refactored and variable declaration fixed
+
 1.0.4 / 2014-02-08
 ==================
 
