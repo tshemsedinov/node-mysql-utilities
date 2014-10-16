@@ -61,7 +61,7 @@ module.exports = {
 					else if (startsWith(value, '<>')) clause = key+' <> '+dbc.escape(value.substring(2));
 					else if (startsWith(value, '>' )) clause = key+' > ' +dbc.escape(value.substring(1));
 					else if (startsWith(value, '<' )) clause = key+' < ' +dbc.escape(value.substring(1));
-					else if (startsWith(value, '(' )) clause = key+' IN ('+value.substr(1, value.length-2).split(',').map(function(s) { return dbc.escape(parseInt(s)); }).join(',')+')';
+					else if (startsWith(value, '(' )) clause = key+' IN ('+value.substr(1, value.length-2).split(',').map(function(s) { return dbc.escape(s); }).join(',')+')';
 					else if (value.indexOf('..') !== -1) {
 						value = value.split('..');
 						clause = '('+key+' BETWEEN '+dbc.escape(value[0])+' AND '+dbc.escape(value[1])+')';
