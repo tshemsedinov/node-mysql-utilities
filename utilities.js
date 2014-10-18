@@ -74,7 +74,25 @@ module.exports = {
 			}
 			return result;
 		};
-
+		
+		// Order builder
+		// Example: {id: 'asc', name: 'desc'}
+		// Returns: "id asc, name desc"
+		//
+		connection.order = function(order) {
+			var 	result = [];
+			for(var key in order){
+				var 	val = order[key],
+					clause = key;
+				result.push(clause + ' ' + val)
+			}
+			if(result.length)
+				return result.join();
+			
+			return '';
+			
+		};
+		
 		// Record count
 		//
 		connection.count = function(table, where, callback) {
@@ -171,10 +189,12 @@ module.exports = {
 
 		// SELECT SQL statement generator
 		//
-		connection.select = function(table, fields, where, callback) {
-			where = this.where(where);
+		connection.select = function(table, fields, where, order, callback) {
+			var 	where = this.where(where),
+				order = this.order(order);
 			var sql = 'SELECT '+fields+' FROM '+escapeIdentifier(table);
 			if (where) sql = sql+ ' WHERE '+where;
+			if (order) sql = sql+ ' ORDER BY '+order;
 			var query = this.query(sql, [], function(err, res) {
 				callback(err, res, query);
 			});
