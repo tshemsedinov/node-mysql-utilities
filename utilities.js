@@ -74,23 +74,20 @@ module.exports = {
 			}
 			return result;
 		};
-		
+
 		// Order builder
-		// Example: {id: 'asc', name: 'desc'}
-		// Returns: "id asc, name desc"
+		//   Example: {id: 'asc', name: 'desc'}
+		//   Returns: "id asc, name desc"
 		//
 		connection.order = function(order) {
-			var 	result = [];
-			for(var key in order){
-				var 	val = order[key],
+			var result = [];
+			for (var key in order) {
+				var val = order[key],
 					clause = key;
-				result.push(clause + ' ' + val)
+				result.push(clause + ' ' + val);
 			}
-			if(result.length)
-				return result.join();
-			
-			return '';
-			
+			if (result.length) return result.join();
+			else return '';
 		};
 		
 		// Record count
@@ -190,8 +187,8 @@ module.exports = {
 		// SELECT SQL statement generator
 		//
 		connection.select = function(table, fields, where, order, callback) {
-			var 	where = this.where(where),
-				order = this.order(order);
+			var where = this.where(where),
+        order = this.order(order);
 			var sql = 'SELECT '+fields+' FROM '+escapeIdentifier(table);
 			if (where) sql = sql+ ' WHERE '+where;
 			if (order) sql = sql+ ' ORDER BY '+order;

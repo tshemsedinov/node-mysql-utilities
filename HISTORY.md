@@ -1,3 +1,9 @@
+1.0.6 / 2014-10-18
+==================
+
+  * Added non-numeric sets support, e.g. connection.select('users', '*', { email: '(test@mail.ru,test3@mail.ru)' });
+  * Implemented order parameter, e.g. connection.select('users', 'id,email', {'name':'test'}, {date: 'asc'}, function() {});
+
 1.0.5 / 2014-05-26
 ==================
 

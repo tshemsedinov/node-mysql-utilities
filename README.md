@@ -564,9 +564,9 @@ console.dir(where);
 // level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)"
 ```
 
-Generate SELECT statement: connection.select(table, whereFilter, callback)
+Generate SELECT statement: connection.select(table, whereFilter, orderBy, callback)
 ```js
-connection.select('Language', '*', { LanguageId: "1..3" }, function(err, results) {
+connection.select('Language', '*', { LanguageId: "1..3" }, { LanguageId: 'desc' }, function(err, results) {
 	console.dir({select:results});
 });
 ```
@@ -641,22 +641,13 @@ connection.delete('Language', { LanguageSign:'TT' }, function(err, affectedRows)
 ## Contributors
 
   - Timur Shemsedinov (marcusaurelius)
+  - See github for full contributors list
 
-## License 
+## License
 
 Dual licensed under the MIT or RUMI licenses.
 
-Copyright (c) 2012-2013 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
+Copyright (c) 2012-2014 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
 
-License: RUMI
-
-Do you know what you are?
-You are a manuscript of a divine letter.
-You are a mirror reflecting a noble face.
-This universe is not outside of you.
-Look inside yourself;
-everything that you want,
-you are already that.
-
-Jalal ad-Din Muhammad Rumi
-"Hush, Don't Say Anything to God: Passionate Poems of Rumi"
+RUMI License: Everything that you want, you are already that.
+// Jalal ad-Din Muhammad Rumi
