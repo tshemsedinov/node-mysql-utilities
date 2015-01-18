@@ -49,7 +49,7 @@ $ npm install mysql-utilities
 ```js
 // Library dependencies
 var mysql = require('mysql'),
-	mysqlUtilities = require('utilities');
+	mysqlUtilities = require('mysql-utilities');
 
 var connection = mysql.createConnection({
 	host:     'localhost',
