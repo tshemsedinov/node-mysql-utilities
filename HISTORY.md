@@ -1,3 +1,9 @@
+1.0.7 / 2015-02-03
+==================
+
+  * Refreshed dependencies (mysql driver version)
+  * Code style fixes
+
 1.0.6 / 2014-10-18
 ==================
 
