@@ -200,7 +200,25 @@ module.exports = {
         callback(err, res, query);
       });
     };
-  
+    
+    // SELECT SQL statement generator by LIMIT
+    //
+    connection.selectLimit = function (table, fields, limit, where, order, callback) {
+      where = this.where(where);
+      if (typeof(order) === 'function') {
+        callback = order;
+        order = {};
+      }
+      order = this.order(order);
+      var sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
+      if (where) sql = sql+ ' WHERE ' + where;
+      if (order) sql = sql+ ' ORDER BY ' + order;
+      sql = sql + ' LIMIT ' + limit.join();
+      var query = this.query(sql, [], function(err, res) {
+        callback(err, res, query);
+      });
+    };
+    
     // INSERT SQL statement generator
     //   callback(err, id or false)
     //
