@@ -1,3 +1,9 @@
+1.0.8 / 2015-07-02
+==================
+
+  * Prevent repeated mixins to avoid memory leaks, issue #10
+  * Code style fixes
+
 1.0.7 / 2015-02-03
 ==================
 

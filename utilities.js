@@ -3,7 +3,7 @@
 var identifierRegexp = /^[0-9,a-z,A-Z_\.]*$/;
 
 var escapeIdentifier = function(str, quote) {
-  quote = quote || "`";
+  quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
   else return '`' + str + '`';
 };
@@ -22,10 +22,11 @@ if (typeof(Function.prototype.override) !== 'function') {
   };
 }
 
-module.exports = {
+function upgrade(connection) {
+    
+  if (!connection._mixedUpgrade) {
 
-  upgrade: function(connection) {
-
+    connection._mixedUpgrade = true;
     connection.slowTime = 2000;
 
     connection.query = connection.query.override(function(sql, values, callback) {
@@ -45,15 +46,16 @@ module.exports = {
     });
     
     // Where clause builder
-    //   Example: { id: 5, year: ">2010", price: "100..200", level: "<=3", sn: "*str?", label: "str", code: "(1,2,4,10,11)" }
-    //   Returns: "id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)"
+    //   Example: { id: 5, year: '>2010', price: '100..200', level: '<=3', sn: '*str?', label: 'str', code: '(1,2,4,10,11)' }
+    //   Returns: 'id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)'
     //
     connection.where = function(where) {
       var dbc = this,
-          result = '';
+          result = '',
+          value, clause;
       for (var key in where) {
-        var value = where[key],
-            clause = key;
+        value = where[key];
+        clause = key;
         if (typeof(value) === 'number') clause = key + ' = ' + value;
         else if (typeof(value) === 'string') {
           /**/ if (startsWith(value, '>=')) clause = key + ' >= ' + dbc.escape(value.substring(2));
@@ -77,13 +79,13 @@ module.exports = {
 
     // Order builder
     //   Example: {id: 'asc', name: 'desc'}
-    //   Returns: "id asc, name desc"
+    //   Returns: 'id asc, name desc'
     //
     connection.order = function(order) {
-      var result = [];
+      var result = [], val, clause;
       for (var key in order) {
-        var val = order[key],
-            clause = key;
+        val = order[key];
+        clause = key;
         result.push(clause + ' ' + val);
       }
       if (result.length) return result.join();
@@ -137,8 +139,9 @@ module.exports = {
       return this.query(sql, values, function(err, res, fields) {
         var result = [];
         if (err) result = false; else {
+          var row;
           for (var i in res) {
-            var row = res[i];
+            row = res[i];
             result.push(row[Object.keys(row)[0]]);
           }
         }
@@ -156,8 +159,9 @@ module.exports = {
       return this.query(sql, values, function(err, res, fields) {
         var result = {};
         if (err) result = false; else {
+          var row;
           for (var i in res) {
-            var row = res[i];
+            row = res[i];
             result[row[Object.keys(row)[0]]] = row;
           }
         }
@@ -175,8 +179,9 @@ module.exports = {
       return this.query(sql, values, function(err, res, fields) {
         var result = {};
         if (err) result = false; else {
+          var row;
           for (var i in res) {
-            var row = res[i];
+            row = res[i];
             result[row[Object.keys(row)[0]]] = row[Object.keys(row)[1]];
           }
         }
@@ -228,10 +233,9 @@ module.exports = {
         if (!err) {
           fields = Object.keys(fields);
           var rowKeys = Object.keys(row),
-              values = [],
-              columns = [];
+              values = [], columns = [], field;
           for (var i in fields) {
-            var field = fields[i];
+            field = fields[i];
             if (rowKeys.indexOf(field)!=-1) {
               columns.push(field);
               values.push(dbc.escape(row[field]));
@@ -254,12 +258,12 @@ module.exports = {
         callback = where;
         dbc.fields(table, function(err, fields) {
           if (!err) {
-            var where = '',
-                data = [],
-                rowKeys = Object.keys(row);
+            var where = '', data = [],
+                rowKeys = Object.keys(row),
+                field, fieldName;
             for (var i in fields) {
-              var field = fields[i],
-                  fieldName = field['Field'];
+              field = fields[i];
+              fieldName = field['Field'];
               if (rowKeys.indexOf(fieldName)!=-1) {
                 if (!where && (field['Key']=='PRI' || field['Key']=='UNI')) where = fieldName + '=' + dbc.escape(row[fieldName]);
                 else data.push(fieldName + '=' + dbc.escape(row[fieldName]));
@@ -301,10 +305,11 @@ module.exports = {
       dbc.fields(table, function(err, fields) {
         if (!err) {
           var rowKeys = Object.keys(row),
-              uniqueKey = '';
+              uniqueKey = '',
+              field, fieldName;
           for (var i in fields) {
-            var field = fields[i],
-                fieldName = field['Field'];
+            field = fields[i];
+            fieldName = field['Field'];
             if (!uniqueKey && (field['Key']=='PRI' || field['Key']=='UNI') && rowKeys.indexOf(fieldName)!=-1) uniqueKey = fieldName;
           }
           if (rowKeys.indexOf(uniqueKey)!=-1) {
@@ -338,9 +343,14 @@ module.exports = {
       }
     };
 
-  },
+  }
+}
 
-  introspection: function(connection) {
+function introspection(connection) {
+
+  if (!connection._mixedIntrospection) {
+
+    connection._mixedIntrospection = true;
 
     // Get primary key metadata
     //   callback(err, row)
@@ -455,8 +465,9 @@ module.exports = {
       this.query('SHOW INDEX FROM ' + escapeIdentifier(table), [], function(err, res) {
         var result = {};
         if (err) result = false; else {
+          var row;
           for (var i in res) {
-            var row = res[i];
+            row = res[i];
             result[row['Key_name']] = row;
           }
         }
@@ -505,5 +516,9 @@ module.exports = {
     };
 
   }
+}
 
+module.exports = {
+  upgrade: upgrade,
+  introspection: introspection
 };
