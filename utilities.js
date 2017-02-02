@@ -23,7 +23,7 @@ if (typeof(Function.prototype.override) !== 'function') {
 }
 
 function upgrade(connection) {
-    
+
   if (!connection._mixedUpgrade) {
 
     connection._mixedUpgrade = true;
@@ -36,15 +36,17 @@ function upgrade(connection) {
         values = [];
       }
       var query = this.inherited(sql, values, function(err, res, fields) {
-        var endTime = new Date().getTime(),
-            executionTime = endTime-startTime;
+        var endTime = new Date().getTime();
+        var executionTime = endTime-startTime;
         connection.emit('query', err, res, fields, query);
-        if (connection.slowTime && (executionTime >= connection.slowTime)) connection.emit('slow', err, res, fields, query, executionTime);
+        if (connection.slowTime && (executionTime >= connection.slowTime)) {
+          connection.emit('slow', err, res, fields, query, executionTime);
+        }
         if (callback) callback(err, res, fields);
       });
       return query;
     });
-    
+
     // Where clause builder
     //   Example: { id: 5, year: '>2010', price: '100..200', level: '<=3', sn: '*str?', label: 'str', code: '(1,2,4,10,11)' }
     //   Returns: 'id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)'
@@ -63,14 +65,21 @@ function upgrade(connection) {
           else if (startsWith(value, '<>')) clause = key + ' <> ' + dbc.escape(value.substring(2));
           else if (startsWith(value, '>' )) clause = key + ' > '  + dbc.escape(value.substring(1));
           else if (startsWith(value, '<' )) clause = key + ' < '  + dbc.escape(value.substring(1));
-          else if (startsWith(value, '(' )) clause = key + ' IN (' + value.substr(1, value.length-2).split(',').map(function(s) { return dbc.escape(s); }).join(',') + ')';
-          else if (value.indexOf('..') !== -1) {
+          else if (startsWith(value, '(' )) {
+            clause = (
+              key + ' IN (' + value.substr(1, value.length-2).split(',').map(function(s) {
+                return dbc.escape(s);
+              }).join(',') + ')'
+            );
+          } else if (value.indexOf('..') !== -1) {
             value = value.split('..');
             clause = '(' + key + ' BETWEEN ' + dbc.escape(value[0]) + ' AND ' + dbc.escape(value[1]) + ')';
           } else if ((value.indexOf('*') !== -1) || (value.indexOf('?') !== -1)) {
             value = value.replace(/\*/g, '%').replace(/\?/g, '_');
             clause = key + ' LIKE ' + dbc.escape(value);
-          } else clause = key + ' = ' + dbc.escape(value);
+          } else {
+            clause = key + ' = ' + dbc.escape(value);
+          }
         }
         if (result) result = result + ' AND ' + clause; else result = clause;
       }
@@ -91,7 +100,7 @@ function upgrade(connection) {
       if (result.length) return result.join();
       else return '';
     };
-    
+
     // Record count
     //
     connection.count = function(table, where, callback) {
@@ -111,7 +120,8 @@ function upgrade(connection) {
         values = [];
       }
       return this.query(sql, values, function(err, res, fields) {
-        if (err) res = false; else res = res[0] ? res[0] : false;
+        if (err) return callback(err);
+        res = res[0] ? res[0] : false;
         callback(err, res, fields);
       });
     };
@@ -124,8 +134,9 @@ function upgrade(connection) {
         values = [];
       }
       return this.queryRow(sql, values, function(err, res, fields) {
-        if (err) res = false; else res = res ? res[Object.keys(res)[0]] : false;
-        callback(err, res, fields);
+        if (err) return callback(err);
+        var value = res[Object.keys(res)[0]];
+        callback(err, value, fields);
       });
     };
 
@@ -157,13 +168,12 @@ function upgrade(connection) {
         values = [];
       }
       return this.query(sql, values, function(err, res, fields) {
+        if (err) return callback(err);
         var result = {};
-        if (err) result = false; else {
-          var row;
-          for (var i in res) {
-            row = res[i];
-            result[row[Object.keys(row)[0]]] = row;
-          }
+        var row;
+        for (var i in res) {
+          row = res[i];
+          result[row[Object.keys(row)[0]]] = row;
         }
         callback(err, result, fields);
       });
@@ -177,13 +187,12 @@ function upgrade(connection) {
         values = [];
       }
       return this.query(sql, values, function(err, res, fields) {
+        if (err) return callback(err);
         var result = {};
-        if (err) result = false; else {
-          var row;
-          for (var i in res) {
-            row = res[i];
-            result[row[Object.keys(row)[0]]] = row[Object.keys(row)[1]];
-          }
+        var row;
+        for (var i in res) {
+          row = res[i];
+          result[row[Object.keys(row)[0]]] = row[Object.keys(row)[1]];
         }
         callback(err, result, fields);
       });
@@ -205,7 +214,7 @@ function upgrade(connection) {
         callback(err, res, query);
       });
     };
-    
+
     // SELECT SQL statement generator by LIMIT
     //
     connection.selectLimit = function (table, fields, limit, where, order, callback) {
@@ -223,30 +232,39 @@ function upgrade(connection) {
         callback(err, res, query);
       });
     };
-    
+
     // INSERT SQL statement generator
     //   callback(err, id or false)
     //
     connection.insert = function(table, row, callback) {
       var dbc = this;
       dbc.fields(table, function(err, fields) {
-        if (!err) {
-          fields = Object.keys(fields);
-          var rowKeys = Object.keys(row),
-              values = [], columns = [], field;
-          for (var i in fields) {
-            field = fields[i];
-            if (rowKeys.indexOf(field)!=-1) {
-              columns.push(field);
-              values.push(dbc.escape(row[field]));
-            }
+        if (err) {
+          return callback(
+            new Error(
+              'Error: Table "' + table + '" not found'
+            ), false
+          );
+        }
+        fields = Object.keys(fields);
+        var rowKeys = Object.keys(row);
+        var values = [], columns = [], field;
+        for (var i in fields) {
+          field = fields[i];
+          if (rowKeys.indexOf(field)!=-1) {
+            columns.push(field);
+            values.push(dbc.escape(row[field]));
           }
-          values = values.join(', ');
-          columns = columns.join(', ');
-          var query = dbc.query('INSERT INTO ' + escapeIdentifier(table) + ' (' + columns + ') VALUES (' + values + ')', [], function(err, res) {
+        }
+        values = values.join(', ');
+        columns = columns.join(', ');
+        var query = dbc.query(
+          'INSERT INTO ' + escapeIdentifier(table) +
+          ' (' + columns + ') VALUES (' + values + ')',
+          [], function(err, res) {
             callback(err, res ? res.insertId : false, query);
-          });
-        } else callback(new Error('Error: Table "' + table + '" not found'), false);
+          }
+        );
       });
     };
 
@@ -257,29 +275,40 @@ function upgrade(connection) {
       if (typeof(where) === 'function') {
         callback = where;
         dbc.fields(table, function(err, fields) {
-          if (!err) {
-            var where = '', data = [],
-                rowKeys = Object.keys(row),
-                field, fieldName;
-            for (var i in fields) {
-              field = fields[i];
-              fieldName = field['Field'];
-              if (rowKeys.indexOf(fieldName)!=-1) {
-                if (!where && (field['Key']=='PRI' || field['Key']=='UNI')) where = fieldName + '=' + dbc.escape(row[fieldName]);
-                else data.push(fieldName + '=' + dbc.escape(row[fieldName]));
+          if (err) {
+            var error = new Error('Error: Table "' + table + '" not found');
+            return callback(err, false);
+          }
+          var where = '', data = [],
+              rowKeys = Object.keys(row),
+              field, fieldName;
+          for (var i in fields) {
+            field = fields[i];
+            fieldName = field.Field;
+            if (rowKeys.indexOf(fieldName)!=-1) {
+              if (!where && (field.Key === 'PRI' || field.Key === 'UNI')) {
+                where = fieldName + '=' + dbc.escape(row[fieldName]);
+              } else {
+                data.push(fieldName + '=' + dbc.escape(row[fieldName]));
               }
             }
-            if (where) {
-              data = data.join(', ');
-              var query = dbc.query('UPDATE ' + escapeIdentifier(table) + ' SET ' + data + ' WHERE ' + where, [], function(err, res) {
+          }
+          if (where) {
+            data = data.join(', ');
+            var query = dbc.query(
+              'UPDATE ' + escapeIdentifier(table) + ' SET ' + data +
+              ' WHERE ' + where, [], function(err, res) {
                 callback(err, res ? res.changedRows : false, query);
-              });
-            } else {
-              var e = new Error('Error: can not insert into "' + table + '" because there is no primary or unique key specified');
-              dbc.emit('error', e);
-              callback(e, false);
-            }
-          } else callback(new Error('Error: Table "' + table + '" not found'), false);
+              }
+            );
+          } else {
+            var e = new Error(
+              'Error: can not insert into "' + table +
+              '" because there is no primary or unique key specified'
+            );
+            dbc.emit('error', e);
+            callback(e, false);
+          }
         });
       } else {
         where = this.where(where);
@@ -287,11 +316,18 @@ function upgrade(connection) {
           var data = [];
           for (var i in row) data.push(i + '=' + dbc.escape(row[i]));
           data = data.join(', ');
-          var query = dbc.query('UPDATE ' + escapeIdentifier(table) + ' SET ' + data + ' WHERE ' + where, [], function(err, res) {
-            callback(err, res ? res.changedRows : false, query);
-          });
+          var query = dbc.query(
+            'UPDATE ' + escapeIdentifier(table) +
+            ' SET ' + data + ' WHERE ' + where, [],
+            function(err, res) {
+              callback(err, res ? res.changedRows : false, query);
+            }
+          );
         } else {
-          var e = new Error('Error: can update "' + table + '", because "where" parameter is empty');
+          var e = new Error(
+            'Error: can update "' + table +
+            '", because "where" parameter is empty'
+          );
           dbc.emit('error', e);
           callback(e, false);
         }
@@ -303,26 +339,41 @@ function upgrade(connection) {
     connection.upsert = function(table, row, callback) {
       var dbc = this;
       dbc.fields(table, function(err, fields) {
-        if (!err) {
-          var rowKeys = Object.keys(row),
-              uniqueKey = '',
-              field, fieldName;
-          for (var i in fields) {
-            field = fields[i];
-            fieldName = field['Field'];
-            if (!uniqueKey && (field['Key']=='PRI' || field['Key']=='UNI') && rowKeys.indexOf(fieldName)!=-1) uniqueKey = fieldName;
+        if (err) {
+          var error = new Error('Error: Table "' + table + '" not found');
+          return callback(error);
+        }
+        var rowKeys = Object.keys(row),
+            uniqueKey = '',
+            field, fieldName;
+        for (var i in fields) {
+          field = fields[i];
+          fieldName = field.Field;
+          if (
+            !uniqueKey &&
+            (field.Key === 'PRI' || field.Key === 'UNI') &&
+            rowKeys.indexOf(fieldName)!=-1
+          ) {
+            uniqueKey = fieldName;
           }
-          if (rowKeys.indexOf(uniqueKey)!=-1) {
-            dbc.queryValue('SELECT count(*) FROM ' + escapeIdentifier(table) + ' WHERE ' + uniqueKey + '=' + dbc.escape(row[uniqueKey]), [], function(err, count) {
+        }
+        if (rowKeys.indexOf(uniqueKey) !== -1) {
+          dbc.queryValue(
+            'SELECT count(*) FROM ' + escapeIdentifier(table) +
+            ' WHERE ' + uniqueKey + '=' + dbc.escape(row[uniqueKey]), [],
+            function(err, count) {
               if (count==1) dbc.update(table, row, callback);
               else dbc.insert(table, row, callback);
-            });
-          } else {
-            var e = new Error('Error: can not insert or update table "' + table + '", primary or unique key is not specified');
-            dbc.emit('error', e);
-            callback(e, false);
-          }
-        } else callback(new Error('Error: Table "' + table + '" not found'), false);
+            }
+          );
+        } else {
+          var e = new Error(
+            'Error: can not insert or update table "' + table +
+            '", primary or unique key is not specified'
+          );
+          dbc.emit('error', e);
+          callback(e, false);
+        }
       });
     };
 
@@ -333,11 +384,17 @@ function upgrade(connection) {
       var dbc = this;
       where = this.where(where);
       if (where) {
-        var query = dbc.query('DELETE FROM ' + escapeIdentifier(table) + ' WHERE ' + where, [], function(err, res) {
-          callback(err, res ? res.affectedRows : false, query);
-        });
+        var query = dbc.query(
+          'DELETE FROM ' + escapeIdentifier(table) + ' WHERE ' + where, [],
+          function(err, res) {
+            callback(err, res ? res.affectedRows : false, query);
+          }
+        );
       } else {
-        var e = new Error('Error: can not delete from "' + table + '", because "where" parameter is empty');
+        var e = new Error(
+          'Error: can not delete from "' + table +
+          '", because "where" parameter is empty'
+        );
         dbc.emit('error', e);
         callback(e, false);
       }
@@ -356,10 +413,14 @@ function introspection(connection) {
     //   callback(err, row)
     //
     connection.primary = function(table, callback) {
-      this.queryRow('SHOW KEYS FROM ' + escapeIdentifier(table) + ' WHERE Key_name = "PRIMARY"', [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.queryRow(
+        'SHOW KEYS FROM ' + escapeIdentifier(table) +
+        ' WHERE Key_name = "PRIMARY"', [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
     // Get foreign key metadata
@@ -400,10 +461,14 @@ function introspection(connection) {
     //   callback(err, fields)
     //
     connection.fields = function(table, callback) {
-      this.queryHash('SHOW FULL COLUMNS FROM ' + escapeIdentifier(table), [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.queryHash(
+        'SHOW FULL COLUMNS FROM ' +
+        escapeIdentifier(table), [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
     // Get connection databases array
@@ -462,27 +527,33 @@ function introspection(connection) {
     //   callback(err, indexes)
     //
     connection.indexes = function(table, callback) {
-      this.query('SHOW INDEX FROM ' + escapeIdentifier(table), [], function(err, res) {
-        var result = {};
-        if (err) result = false; else {
-          var row;
-          for (var i in res) {
-            row = res[i];
-            result[row['Key_name']] = row;
+      this.query(
+        'SHOW INDEX FROM ' + escapeIdentifier(table), [],
+        function(err, res) {
+          var result = {};
+          if (err) result = false; else {
+            var row;
+            for (var i in res) {
+              row = res[i];
+              result[row.Key_name] = row;
+            }
           }
+          callback(err, result);
         }
-        callback(err, result);
-      });
+      );
     };
 
     // Get server process list
     //   callback(err, processes)
     //
     connection.processes = function(callback) {
-      this.query('SELECT * FROM information_schema.PROCESSLIST', [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.query(
+        'SELECT * FROM information_schema.PROCESSLIST', [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
     // Get server global variables
