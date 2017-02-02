@@ -1,11 +1,11 @@
 'use strict';
 
-var identifierRegexp = /^[0-9,a-z,A-Z_\.]*$/;
+var identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
 var escapeIdentifier = function(str, quote) {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
-  else return '`' + str + '`';
+  else return quote + str + quote;
 };
 
 var startsWith = function(value, str) {
@@ -29,27 +29,34 @@ function upgrade(connection) {
     connection._mixedUpgrade = true;
     connection.slowTime = 2000;
 
-    connection.query = connection.query.override(function(sql, values, callback) {
-      var startTime = new Date().getTime();
-      if (typeof(values) === 'function') {
-        callback = values;
-        values = [];
-      }
-      var query = this.inherited(sql, values, function(err, res, fields) {
-        var endTime = new Date().getTime();
-        var executionTime = endTime-startTime;
-        connection.emit('query', err, res, fields, query);
-        if (connection.slowTime && (executionTime >= connection.slowTime)) {
-          connection.emit('slow', err, res, fields, query, executionTime);
+    connection.query = connection.query.override(
+      function(sql, values, callback) {
+        var startTime = new Date().getTime();
+        if (typeof(values) === 'function') {
+          callback = values;
+          values = [];
         }
-        if (callback) callback(err, res, fields);
-      });
-      return query;
-    });
+        var query = this.inherited(sql, values, function(err, res, fields) {
+          var endTime = new Date().getTime();
+          var executionTime = endTime - startTime;
+          connection.emit('query', err, res, fields, query);
+          if (connection.slowTime && (executionTime >= connection.slowTime)) {
+            connection.emit('slow', err, res, fields, query, executionTime);
+          }
+          if (callback) callback(err, res, fields);
+        });
+        return query;
+      }
+    );
 
     // Where clause builder
-    //   Example: { id: 5, year: '>2010', price: '100..200', level: '<=3', sn: '*str?', label: 'str', code: '(1,2,4,10,11)' }
-    //   Returns: 'id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)'
+    //   Example: {
+    //     id: 5, year: '>2010', price: '100..200',
+    //     level: '<=3', sn: '*str?', label: 'str',
+    //     code: '(1,2,4,10,11)' }
+    //   Returns: 'id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200')
+    //     AND level <= '3' AND sn LIKE '%str_'
+    //     AND label = 'str' AND code IN (1,2,4,10,11)'
     //
     connection.where = function(where) {
       var dbc = this,
@@ -58,23 +65,40 @@ function upgrade(connection) {
       for (var key in where) {
         value = where[key];
         clause = key;
-        if (typeof(value) === 'number') clause = key + ' = ' + value;
-        else if (typeof(value) === 'string') {
-          /**/ if (startsWith(value, '>=')) clause = key + ' >= ' + dbc.escape(value.substring(2));
-          else if (startsWith(value, '<=')) clause = key + ' <= ' + dbc.escape(value.substring(2));
-          else if (startsWith(value, '<>')) clause = key + ' <> ' + dbc.escape(value.substring(2));
-          else if (startsWith(value, '>' )) clause = key + ' > '  + dbc.escape(value.substring(1));
-          else if (startsWith(value, '<' )) clause = key + ' < '  + dbc.escape(value.substring(1));
-          else if (startsWith(value, '(' )) {
+        if (typeof(value) === 'number') {
+          clause = key + ' = ' + value;
+        } else if (typeof(value) === 'string') {
+          if (startsWith(value, '>=')) {
+            clause = key + ' >= ' + dbc.escape(value.substring(2));
+          } else if (startsWith(value, '<=')) {
+            clause = key + ' <= ' + dbc.escape(value.substring(2));
+          } else if (startsWith(value, '<>')) {
+            clause = key + ' <> ' + dbc.escape(value.substring(2));
+          } else if (startsWith(value, '>')) {
+            clause = key + ' > ' + dbc.escape(value.substring(1));
+          } else if (startsWith(value, '<')) {
+            clause = key + ' < ' + dbc.escape(value.substring(1));
+          } else if (startsWith(value, '(')) {
             clause = (
-              key + ' IN (' + value.substr(1, value.length-2).split(',').map(function(s) {
-                return dbc.escape(s);
-              }).join(',') + ')'
+              key + ' IN (' + (value
+                .substr(1, value.length - 2)
+                .split(',')
+                .map(function(s) {
+                  return dbc.escape(s);
+                })
+              ).join(',') + ')'
             );
           } else if (value.indexOf('..') !== -1) {
             value = value.split('..');
-            clause = '(' + key + ' BETWEEN ' + dbc.escape(value[0]) + ' AND ' + dbc.escape(value[1]) + ')';
-          } else if ((value.indexOf('*') !== -1) || (value.indexOf('?') !== -1)) {
+            clause = (
+              '(' + key + ' BETWEEN ' +
+              dbc.escape(value[0]) + ' AND ' +
+              dbc.escape(value[1]) + ')'
+            );
+          } else if (
+            value.indexOf('*') !== -1 ||
+            value.indexOf('?') !== -1
+          ) {
             value = value.replace(/\*/g, '%').replace(/\?/g, '_');
             clause = key + ' LIKE ' + dbc.escape(value);
           } else {
@@ -87,7 +111,7 @@ function upgrade(connection) {
     };
 
     // Order builder
-    //   Example: {id: 'asc', name: 'desc'}
+    //   Example: { id: 'asc', name: 'desc' }
     //   Returns: 'id asc, name desc'
     //
     connection.order = function(order) {
@@ -179,7 +203,8 @@ function upgrade(connection) {
       });
     };
 
-    // Query returning key-value array, first field of query will be key and second will be value
+    // Query returning key-value array,
+    // first field of query will be key and second will be value
     //
     connection.queryKeyValue = function(sql, values, callback) {
       if (typeof(values) === 'function') {
@@ -208,8 +233,8 @@ function upgrade(connection) {
       }
       order = this.order(order);
       var sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
-      if (where) sql = sql+ ' WHERE ' + where;
-      if (order) sql = sql+ ' ORDER BY ' + order;
+      if (where) sql = sql + ' WHERE ' + where;
+      if (order) sql = sql + ' ORDER BY ' + order;
       var query = this.query(sql, [], function(err, res) {
         callback(err, res, query);
       });
@@ -217,7 +242,9 @@ function upgrade(connection) {
 
     // SELECT SQL statement generator by LIMIT
     //
-    connection.selectLimit = function (table, fields, limit, where, order, callback) {
+    connection.selectLimit = function(
+      table, fields, limit, where, order, callback
+    ) {
       where = this.where(where);
       if (typeof(order) === 'function') {
         callback = order;
@@ -225,8 +252,8 @@ function upgrade(connection) {
       }
       order = this.order(order);
       var sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
-      if (where) sql = sql+ ' WHERE ' + where;
-      if (order) sql = sql+ ' ORDER BY ' + order;
+      if (where) sql = sql + ' WHERE ' + where;
+      if (order) sql = sql + ' ORDER BY ' + order;
       sql = sql + ' LIMIT ' + limit.join();
       var query = this.query(sql, [], function(err, res) {
         callback(err, res, query);
@@ -251,7 +278,7 @@ function upgrade(connection) {
         var values = [], columns = [], field;
         for (var i in fields) {
           field = fields[i];
-          if (rowKeys.indexOf(field)!=-1) {
+          if (rowKeys.indexOf(field) !== -1) {
             columns.push(field);
             values.push(dbc.escape(row[field]));
           }
@@ -277,7 +304,7 @@ function upgrade(connection) {
         dbc.fields(table, function(err, fields) {
           if (err) {
             var error = new Error('Error: Table "' + table + '" not found');
-            return callback(err, false);
+            return callback(error);
           }
           var where = '', data = [],
               rowKeys = Object.keys(row),
@@ -285,7 +312,7 @@ function upgrade(connection) {
           for (var i in fields) {
             field = fields[i];
             fieldName = field.Field;
-            if (rowKeys.indexOf(fieldName)!=-1) {
+            if (rowKeys.indexOf(fieldName) !== -1) {
               if (!where && (field.Key === 'PRI' || field.Key === 'UNI')) {
                 where = fieldName + '=' + dbc.escape(row[fieldName]);
               } else {
@@ -352,7 +379,7 @@ function upgrade(connection) {
           if (
             !uniqueKey &&
             (field.Key === 'PRI' || field.Key === 'UNI') &&
-            rowKeys.indexOf(fieldName)!=-1
+            rowKeys.indexOf(fieldName) !== -1
           ) {
             uniqueKey = fieldName;
           }
@@ -362,7 +389,7 @@ function upgrade(connection) {
             'SELECT count(*) FROM ' + escapeIdentifier(table) +
             ' WHERE ' + uniqueKey + '=' + dbc.escape(row[uniqueKey]), [],
             function(err, count) {
-              if (count==1) dbc.update(table, row, callback);
+              if (count === 1) dbc.update(table, row, callback);
               else dbc.insert(table, row, callback);
             }
           );
@@ -428,9 +455,11 @@ function introspection(connection) {
     //
     connection.foreign = function(table, callback) {
       this.queryHash(
-        'SELECT CONSTRAINT_NAME, COLUMN_NAME, ORDINAL_POSITION, POSITION_IN_UNIQUE_CONSTRAINT, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME ' +
-        'FROM information_schema.KEY_COLUMN_USAGE ' +
-        'WHERE REFERENCED_TABLE_NAME IS NOT NULL AND CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = ? ' +
+        'SELECT CONSTRAINT_NAME, COLUMN_NAME, ORDINAL_POSITION, ' +
+        'POSITION_IN_UNIQUE_CONSTRAINT, REFERENCED_TABLE_NAME, ' +
+        'REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE ' +
+        'WHERE REFERENCED_TABLE_NAME IS NOT NULL AND ' +
+        'CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = ? ' +
         'ORDER BY REFERENCED_TABLE_NAME',
         [table],
         function(err, res) {
@@ -445,7 +474,8 @@ function introspection(connection) {
     //
     connection.constraints = function(table, callback) {
       this.queryHash(
-        'SELECT CONSTRAINT_NAME, UNIQUE_CONSTRAINT_NAME, REFERENCED_TABLE_NAME, MATCH_OPTION, UPDATE_RULE, DELETE_RULE ' +
+        'SELECT CONSTRAINT_NAME, UNIQUE_CONSTRAINT_NAME, ' +
+        'REFERENCED_TABLE_NAME, MATCH_OPTION, UPDATE_RULE, DELETE_RULE ' +
         'FROM information_schema.REFERENTIAL_CONSTRAINTS ' +
         'WHERE TABLE_NAME = ? ' +
         'ORDER BY CONSTRAINT_NAME',
@@ -486,9 +516,11 @@ function introspection(connection) {
     //
     connection.databaseTables = function(database, callback) {
       this.queryHash(
-        'SELECT TABLE_NAME, TABLE_TYPE, ENGINE, VERSION, ROW_FORMAT, TABLE_ROWS, ' +
-        'AVG_ROW_LENGTH, DATA_LENGTH, MAX_DATA_LENGTH, INDEX_LENGTH, DATA_FREE, AUTO_INCREMENT, ' +
-        'CREATE_TIME, UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, CREATE_OPTIONS, TABLE_COMMENT ' +
+        'SELECT TABLE_NAME, TABLE_TYPE, ENGINE, VERSION, ROW_FORMAT, ' +
+        'TABLE_ROWS, AVG_ROW_LENGTH, DATA_LENGTH, MAX_DATA_LENGTH, ' +
+        'INDEX_LENGTH, DATA_FREE, AUTO_INCREMENT, CREATE_TIME, ' +
+        'UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, ' +
+        'CREATE_OPTIONS, TABLE_COMMENT ' +
         'FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?', [database],
         function(err, res) {
           if (err) res = false;
@@ -502,9 +534,11 @@ function introspection(connection) {
     //
     connection.tables = function(callback) {
       this.queryHash(
-        'SELECT TABLE_NAME, TABLE_TYPE, ENGINE, VERSION, ROW_FORMAT, TABLE_ROWS, ' +
-        'AVG_ROW_LENGTH, DATA_LENGTH, MAX_DATA_LENGTH, INDEX_LENGTH, DATA_FREE, AUTO_INCREMENT, ' +
-        'CREATE_TIME, UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, CREATE_OPTIONS, TABLE_COMMENT ' +
+        'SELECT TABLE_NAME, TABLE_TYPE, ENGINE, VERSION, ROW_FORMAT, ' +
+        'TABLE_ROWS, AVG_ROW_LENGTH, DATA_LENGTH, MAX_DATA_LENGTH, ' +
+        'INDEX_LENGTH, DATA_FREE, AUTO_INCREMENT, CREATE_TIME, ' +
+        'UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, ' +
+        'CREATE_OPTIONS, TABLE_COMMENT ' +
         'FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()', [],
         function(err, res) {
           if (err) res = false;
@@ -560,30 +594,39 @@ function introspection(connection) {
     //   callback(err, variables)
     //
     connection.globalVariables = function(callback) {
-      this.queryKeyValue('SELECT * FROM information_schema.GLOBAL_VARIABLES', [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.queryKeyValue(
+        'SELECT * FROM information_schema.GLOBAL_VARIABLES', [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
     // Get server global status
     //   callback(err, status)
     //
     connection.globalStatus = function(callback) {
-      this.queryKeyValue('SELECT * FROM information_schema.GLOBAL_STATUS', [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.queryKeyValue(
+        'SELECT * FROM information_schema.GLOBAL_STATUS', [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
     // Get database users
     //   callback(err, users)
     //
     connection.users = function(callback) {
-      this.query('SELECT * FROM mysql.user', [], function(err, res) {
-        if (err) res = false;
-        callback(err, res);
-      });
+      this.query(
+        'SELECT * FROM mysql.user', [],
+        function(err, res) {
+          if (err) res = false;
+          callback(err, res);
+        }
+      );
     };
 
   }
