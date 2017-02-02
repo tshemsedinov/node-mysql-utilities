@@ -124,7 +124,7 @@ function upgrade(connection) {
         values = [];
       }
       return this.queryRow(sql, values, function(err, res, fields) {
-        if (err) res = false; else res = res[Object.keys(res)[0]];
+        if (err) res = false; else res = res ? res[Object.keys(res)[0]] : false;
         callback(err, res, fields);
       });
     };
