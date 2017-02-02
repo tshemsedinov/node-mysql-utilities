@@ -105,7 +105,7 @@ function upgrade(connection) {
             clause = key + ' = ' + dbc.escape(value);
           }
         }
-        if (result) result = result + ' AND ' + clause; else result = clause;
+        result = result ? (result + ' AND ' + clause) : clause;
       }
       return result;
     };
@@ -172,13 +172,12 @@ function upgrade(connection) {
         values = [];
       }
       return this.query(sql, values, function(err, res, fields) {
+        if (err) return callback(err);
         var result = [];
-        if (err) result = false; else {
-          var row;
-          for (var i in res) {
-            row = res[i];
-            result.push(row[Object.keys(row)[0]]);
-          }
+        var row;
+        for (var i in res) {
+          row = res[i];
+          result.push(row[Object.keys(row)[0]]);
         }
         callback(err, result, fields);
       });
