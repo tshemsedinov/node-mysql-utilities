@@ -1,6 +1,6 @@
 {
   "name": "mysql-utilities",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
   "keywords": [
@@ -9,23 +9,20 @@
     "introspection",
     "impress"
   ],
+  "readmeFilename": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/tshemsedinov/node-mysql-utilities"
   },
   "main": "./utilities",
-  "dependencies": {
-    "mysql": "2.15.x"
-  },
   "engines": {
     "node": ">= 0.6",
     "iojs": ">= 1.0.0"
   },
-  "readmeFilename": "README.md",
-  "jshintConfig": {
-    "predef": [ "api", "impress", "db", "global", "cms", "inArray", "emptyness", "window" ],
-    "node": true,
-    "indent": 2,
-    "maxcomplexity": 25
+  "dependencies": {
+    "mysql": "2.15.x"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0"
   }
 }

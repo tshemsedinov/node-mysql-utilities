@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 var mysql = require('mysql');
 var mysqlUtilities = require('./utilities');
