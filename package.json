@@ -16,7 +16,7 @@
   },
   "main": "./utilities",
   "scripts": {
-    "test": "npm run lint",
+    "test": "npm run lint && node example",
     "lint": "eslint ."
   },
   "engines": {
