@@ -8,10 +8,6 @@ const escapeIdentifier = (str, quote) => {
   else return quote + str + quote;
 };
 
-const startsWith = (value, str) => (
-  value.slice(0, str.length) === str
-);
-
 if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
@@ -22,7 +18,7 @@ if (typeof(Function.prototype.override) !== 'function') {
   };
 }
 
-function upgrade(connection) {
+const upgrade = (connection) => {
 
   if (!connection._mixedUpgrade) {
 
@@ -68,17 +64,17 @@ function upgrade(connection) {
         if (typeof(value) === 'number') {
           clause = key + ' = ' + value;
         } else if (typeof(value) === 'string') {
-          if (startsWith(value, '>=')) {
+          if (value.startsWith('>=')) {
             clause = key + ' >= ' + dbc.escape(value.substring(2));
-          } else if (startsWith(value, '<=')) {
+          } else if (value.startsWith('<=')) {
             clause = key + ' <= ' + dbc.escape(value.substring(2));
-          } else if (startsWith(value, '<>')) {
+          } else if (value.startsWith('<>')) {
             clause = key + ' <> ' + dbc.escape(value.substring(2));
-          } else if (startsWith(value, '>')) {
+          } else if (value.startsWith('>')) {
             clause = key + ' > ' + dbc.escape(value.substring(1));
-          } else if (startsWith(value, '<')) {
+          } else if (value.startsWith('<')) {
             clause = key + ' < ' + dbc.escape(value.substring(1));
-          } else if (startsWith(value, '(')) {
+          } else if (value.startsWith('(')) {
             clause = (
               key + ' IN (' + (value
                 .substr(1, value.length - 2)
@@ -429,9 +425,9 @@ function upgrade(connection) {
     };
 
   }
-}
+};
 
-function introspection(connection) {
+const introspection = (connection) => {
 
   if (!connection._mixedIntrospection) {
 
@@ -631,7 +627,7 @@ function introspection(connection) {
     };
 
   }
-}
+};
 
 module.exports = {
   upgrade,
