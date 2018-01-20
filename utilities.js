@@ -2,15 +2,15 @@
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
-const escapeIdentifier = function(str, quote) {
+const escapeIdentifier = (str, quote) => {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
   else return quote + str + quote;
 };
 
-const startsWith = function(value, str) {
-  return value.slice(0, str.length) === str;
-};
+const startsWith = (value, str) => (
+  value.slice(0, str.length) === str
+);
 
 if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
