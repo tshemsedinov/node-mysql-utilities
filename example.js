@@ -5,9 +5,9 @@ const mysqlUtilities = require('./utilities');
 
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'userName',
-  password: 'userPassword',
-  database: 'databaseName'
+  user: 'travis',
+  password: '',
+  database: 'db',
 });
 
 connection.connect();
