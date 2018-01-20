@@ -15,7 +15,7 @@ const startsWith = (value, str) => (
 if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
-    return () => {
+    return function() {
       this.inherited = superFunction;
       return fn.apply(this, arguments);
     };
