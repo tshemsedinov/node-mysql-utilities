@@ -1,9 +1,9 @@
 'use strict';
 
-var mysql = require('mysql');
-var mysqlUtilities = require('./utilities');
+const mysql = require('mysql');
+const mysqlUtilities = require('./utilities');
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host: 'localhost',
   user: 'userName',
   password: 'userPassword',
@@ -17,13 +17,13 @@ mysqlUtilities.introspection(connection);
 
 connection.slowTime = 100; // ms
 
-connection.on('query', function(err, res, fields, query) {
-  console.dir({ onQuery: { err: err, query: query.sql } });
+connection.on('query', (err, res, fields, query) => {
+  console.dir({ onQuery: { err, query: query.sql } });
 });
 
-connection.on('slow', function(err, res, fields, query, executionTime) {
+connection.on('slow', (err, res, fields, query, executionTime) => {
   console.dir({
-    onSlow: { err: err, executionTime: executionTime, query: query.sql }
+    onSlow: { err, executionTime, query: query.sql }
   });
 });
 
@@ -38,8 +38,8 @@ console.log({
 connection.select(
   '_Language', '*',
   { LanguageId: '1..3' },
-  function(err, results) {
-    console.dir({ select: results, err: err });
+  (err, results) => {
+    console.dir({ select: results, err });
   }
 );
 
@@ -47,8 +47,8 @@ connection.insert(
   '_Language',
   { LanguageName: 'Uygurian', LanguageSign: 'UY',
     LanguageISO: 'UY', Caption: 'Uygurian' },
-  function(err, results) {
-    console.dir({ insert: results, err: err });
+  (err, results) => {
+    console.dir({ insert: results, err });
   }
 );
 
@@ -57,8 +57,8 @@ connection.update(
   { LanguageId: 1, LanguageName: 'Qwertian',
     LanguageSign: 'QW', LanguageISO: 'QW',
     Caption: 'Qwertian' },
-  function(err, results) {
-    console.dir({ update: results, err: err });
+  (err, results) => {
+    console.dir({ update: results, err });
   }
 );
 
@@ -66,8 +66,8 @@ connection.update(
   '_Language',
   { LanguageName: 'QwertianA', LanguageSign: 'QA' },
   { LanguageId: 1 },
-  function(err, results) {
-    console.dir({ update: results, err: err });
+  (err, results) => {
+    console.dir({ update: results, err });
   }
 );
 
@@ -76,36 +76,36 @@ connection.upsert(
   { LanguageId: 1,
     LanguageName: 'Qwertianian', LanguageSign: 'QW',
     LanguageISO: 'QW', Caption: 'Qwertianian' },
-  function(err, results) {
-    console.dir({ upsert: results, err: err });
+  (err, results) => {
+    console.dir({ upsert: results, err });
   }
 );
 
 connection.delete(
   '_Language',
   { LanguageSign: 'UY' },
-  function(err, results) {
-    console.dir({ delete: results, err: err });
+  (err, results) => {
+    console.dir({ delete: results, err });
   }
 );
 
 connection.query(
   'SELECT * FROM _Language where LanguageId > ?', [2],
-  function(err, results) {
+  (err, results) => {
     console.dir({ query: results });
   }
 );
 
 connection.queryRow(
   'SELECT * FROM _Language where LanguageId = ?', [3],
-  function(err, row) {
+  (err, row) => {
     console.dir({ queryRow: row });
   }
 );
 
 connection.queryValue(
   'SELECT LanguageName FROM _Language where LanguageId = ?', [8],
-  function(err, name) {
+  (err, name) => {
     console.dir({ queryValue: name });
   }
 );
@@ -113,79 +113,79 @@ connection.queryValue(
 connection.queryHash(
   'SELECT LanguageSign, LanguageId, LanguageName, Caption, LanguageISO ' +
   'FROM _Language', [],
-  function(err, arr) {
+  (err, arr) => {
     console.dir({ queryHash: arr });
   }
 );
 
 connection.queryCol(
   'SELECT LanguageSign FROM _Language', [],
-  function(err, arr) {
+  (err, arr) => {
     console.dir({ queryCol: arr });
   }
 );
 
 connection.queryKeyValue(
   'SELECT LanguageISO, LanguageName FROM _Language', [],
-  function(err, keyValue) {
+  (err, keyValue) => {
     console.dir({ queryKeyValue: keyValue });
   }
 );
 
-connection.count('_Language', { LanguageId: '>3' }, function(err, count) {
-  console.dir({ count: count });
+connection.count('_Language', { LanguageId: '>3' }, (err, count) => {
+  console.dir({ count });
 });
 
-connection.primary('_Language', function(err, primary) {
-  console.dir({ primary: primary });
+connection.primary('_Language', (err, primary) => {
+  console.dir({ primary });
 });
 
-connection.foreign('_TemplateCaption', function(err, foreign) {
-  console.dir({ foreign: foreign });
+connection.foreign('_TemplateCaption', (err, foreign) => {
+  console.dir({ foreign });
 });
 
-connection.constraints('_TemplateCaption', function(err, constraints) {
-  console.dir({ constraints: constraints });
+connection.constraints('_TemplateCaption', (err, constraints) => {
+  console.dir({ constraints });
 });
 
-connection.fields('_Language', function(err, fields) {
-  console.dir({ fields: fields });
+connection.fields('_Language', (err, fields) => {
+  console.dir({ fields });
 });
 
-connection.databases(function(err, databases) {
-  console.dir({ databases: databases });
+connection.databases((err, databases) => {
+  console.dir({ databases });
 });
 
-connection.tables(function(err, tables) {
-  console.dir({ tables: tables });
+connection.tables((err, tables) => {
+  console.dir({ tables });
 });
 
-connection.databaseTables('mezha', function(err, tables) {
-  console.dir({ tables: tables });
+connection.databaseTables('mezha', (err, tables) => {
+  console.dir({ tables });
 });
 
-connection.tableInfo('_Language', function(err, info) {
+connection.tableInfo('_Language', (err, info) => {
   console.dir({ tableInfo: info });
 });
 
-connection.indexes('_Language', function(err, indexes) {
-  console.dir({ indexes: indexes });
+connection.indexes('_Language', (err, indexes) => {
+  console.dir({ indexes });
 });
 
-connection.processes(function(err, processes) {
-  console.dir({ processes: processes });
+connection.processes((err, processes) => {
+  console.dir({ processes });
 });
 
-connection.globalVariables(function(err, globalVariables) {
-  console.dir({ globalVariables: globalVariables });
+connection.globalVariables((err, globalVariables) => {
+  console.dir({ globalVariables });
 });
 
-connection.globalStatus(function(err, globalStatus) {
-  console.dir({ globalStatus: globalStatus });
+connection.globalStatus((err, globalStatus) => {
+  console.dir({ globalStatus });
 });
 
-connection.users(function(err, users) {
-  console.dir({ users: users });
+connection.users((err, users) => {
+  console.dir({ users });
 });
 
-setTimeout(function() { connection.end(); }, 2000);
+setTimeout(() => { connection.end(); }, 2000);

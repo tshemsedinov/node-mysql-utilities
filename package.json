@@ -15,9 +15,12 @@
     "url": "https://github.com/tshemsedinov/node-mysql-utilities"
   },
   "main": "./utilities",
+  "scripts": {
+    "test": "npm run lint",
+    "lint": "eslint ."
+  },
   "engines": {
-    "node": ">= 0.6",
-    "iojs": ">= 1.0.0"
+    "node": ">= 4.0"
   },
   "dependencies": {
     "mysql": "2.15.x"

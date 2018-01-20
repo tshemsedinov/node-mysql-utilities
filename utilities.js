@@ -1,23 +1,23 @@
 'use strict';
 
-var identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
+const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
-var escapeIdentifier = function(str, quote) {
+const escapeIdentifier = function(str, quote) {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
   else return quote + str + quote;
 };
 
-var startsWith = function(value, str) {
+const startsWith = function(value, str) {
   return value.slice(0, str.length) === str;
 };
 
 if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
-    var superFunction = this;
-    return function() {
+    const superFunction = this;
+    return (...args) => {
       this.inherited = superFunction;
-      return fn.apply(this, arguments);
+      return fn.apply(this, args);
     };
   };
 }
@@ -31,14 +31,14 @@ function upgrade(connection) {
 
     connection.query = connection.query.override(
       function(sql, values, callback) {
-        var startTime = new Date().getTime();
+        const startTime = new Date().getTime();
         if (typeof(values) === 'function') {
           callback = values;
           values = [];
         }
-        var query = this.inherited(sql, values, function(err, res, fields) {
-          var endTime = new Date().getTime();
-          var executionTime = endTime - startTime;
+        const query = this.inherited(sql, values, (err, res, fields) => {
+          const endTime = new Date().getTime();
+          const executionTime = endTime - startTime;
           connection.emit('query', err, res, fields, query);
           if (connection.slowTime && (executionTime >= connection.slowTime)) {
             connection.emit('slow', err, res, fields, query, executionTime);
@@ -59,10 +59,10 @@ function upgrade(connection) {
     //     AND label = 'str' AND code IN (1,2,4,10,11)'
     //
     connection.where = function(where) {
-      var dbc = this,
-          result = '',
-          value, clause;
-      for (var key in where) {
+      const dbc = this;
+      let result = '';
+      let value, clause;
+      for (const key in where) {
         value = where[key];
         clause = key;
         if (typeof(value) === 'number') {
@@ -83,9 +83,7 @@ function upgrade(connection) {
               key + ' IN (' + (value
                 .substr(1, value.length - 2)
                 .split(',')
-                .map(function(s) {
-                  return dbc.escape(s);
-                })
+                .map(s => dbc.escape(s))
               ).join(',') + ')'
             );
           } else if (value.indexOf('..') !== -1) {
@@ -115,8 +113,9 @@ function upgrade(connection) {
     //   Returns: 'id asc, name desc'
     //
     connection.order = function(order) {
-      var result = [], val, clause;
-      for (var key in order) {
+      const result = [];
+      let val, clause;
+      for (const key in order) {
         val = order[key];
         clause = key;
         result.push(clause + ' ' + val);
@@ -129,9 +128,9 @@ function upgrade(connection) {
     //
     connection.count = function(table, where, callback) {
       where = this.where(where);
-      var sql = 'SELECT count(*) FROM ' + escapeIdentifier(table);
+      let sql = 'SELECT count(*) FROM ' + escapeIdentifier(table);
       if (where) sql = sql + ' WHERE ' + where;
-      return this.queryValue(sql, [], function(err, res) {
+      return this.queryValue(sql, [], (err, res) => {
         callback(err, res);
       });
     };
@@ -143,7 +142,7 @@ function upgrade(connection) {
         callback = values;
         values = [];
       }
-      return this.query(sql, values, function(err, res, fields) {
+      return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         res = res[0] ? res[0] : false;
         callback(err, res, fields);
@@ -157,9 +156,9 @@ function upgrade(connection) {
         callback = values;
         values = [];
       }
-      return this.queryRow(sql, values, function(err, res, fields) {
+      return this.queryRow(sql, values, (err, res, fields) => {
         if (err) return callback(err);
-        var value = res[Object.keys(res)[0]];
+        const value = res[Object.keys(res)[0]];
         callback(err, value, fields);
       });
     };
@@ -171,11 +170,11 @@ function upgrade(connection) {
         callback = values;
         values = [];
       }
-      return this.query(sql, values, function(err, res, fields) {
+      return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
-        var result = [];
-        var row;
-        for (var i in res) {
+        const result = [];
+        let row;
+        for (const i in res) {
           row = res[i];
           result.push(row[Object.keys(row)[0]]);
         }
@@ -190,11 +189,11 @@ function upgrade(connection) {
         callback = values;
         values = [];
       }
-      return this.query(sql, values, function(err, res, fields) {
+      return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
-        var result = {};
-        var row;
-        for (var i in res) {
+        const result = {};
+        let row;
+        for (const i in res) {
           row = res[i];
           result[row[Object.keys(row)[0]]] = row;
         }
@@ -210,11 +209,11 @@ function upgrade(connection) {
         callback = values;
         values = [];
       }
-      return this.query(sql, values, function(err, res, fields) {
+      return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
-        var result = {};
-        var row;
-        for (var i in res) {
+        const result = {};
+        let i, row;
+        for (i in res) {
           row = res[i];
           result[row[Object.keys(row)[0]]] = row[Object.keys(row)[1]];
         }
@@ -231,10 +230,10 @@ function upgrade(connection) {
         order = {};
       }
       order = this.order(order);
-      var sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
+      let sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
       if (where) sql = sql + ' WHERE ' + where;
       if (order) sql = sql + ' ORDER BY ' + order;
-      var query = this.query(sql, [], function(err, res) {
+      const query = this.query(sql, [], (err, res) => {
         callback(err, res, query);
       });
     };
@@ -250,11 +249,11 @@ function upgrade(connection) {
         order = {};
       }
       order = this.order(order);
-      var sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
+      let sql = 'SELECT ' + fields + ' FROM ' + escapeIdentifier(table);
       if (where) sql = sql + ' WHERE ' + where;
       if (order) sql = sql + ' ORDER BY ' + order;
       sql = sql + ' LIMIT ' + limit.join();
-      var query = this.query(sql, [], function(err, res) {
+      const query = this.query(sql, [], (err, res) => {
         callback(err, res, query);
       });
     };
@@ -263,8 +262,8 @@ function upgrade(connection) {
     //   callback(err, id or false)
     //
     connection.insert = function(table, row, callback) {
-      var dbc = this;
-      dbc.fields(table, function(err, fields) {
+      const dbc = this;
+      dbc.fields(table, (err, fields) => {
         if (err) {
           return callback(
             new Error(
@@ -273,9 +272,11 @@ function upgrade(connection) {
           );
         }
         fields = Object.keys(fields);
-        var rowKeys = Object.keys(row);
-        var values = [], columns = [], field;
-        for (var i in fields) {
+        const rowKeys = Object.keys(row);
+        let values = [];
+        let columns = [];
+        let i, field;
+        for (i in fields) {
           field = fields[i];
           if (rowKeys.indexOf(field) !== -1) {
             columns.push(field);
@@ -284,10 +285,10 @@ function upgrade(connection) {
         }
         values = values.join(', ');
         columns = columns.join(', ');
-        var query = dbc.query(
+        const query = dbc.query(
           'INSERT INTO ' + escapeIdentifier(table) +
           ' (' + columns + ') VALUES (' + values + ')',
-          [], function(err, res) {
+          [], (err, res) => {
             callback(err, res ? res.insertId : false, query);
           }
         );
@@ -297,18 +298,19 @@ function upgrade(connection) {
     // UPDATE SQL statement generator
     //
     connection.update = function(table, row, where, callback) {
-      var dbc = this;
+      const dbc = this;
       if (typeof(where) === 'function') {
         callback = where;
-        dbc.fields(table, function(err, fields) {
+        dbc.fields(table, (err, fields) => {
           if (err) {
-            var error = new Error('Error: Table "' + table + '" not found');
+            const error = new Error('Error: Table "' + table + '" not found');
             return callback(error);
           }
-          var where = '', data = [],
-              rowKeys = Object.keys(row),
-              field, fieldName;
-          for (var i in fields) {
+          let where = '';
+          let data = [];
+          const rowKeys = Object.keys(row);
+          let field, fieldName;
+          for (const i in fields) {
             field = fields[i];
             fieldName = field.Field;
             if (rowKeys.indexOf(fieldName) !== -1) {
@@ -321,14 +323,14 @@ function upgrade(connection) {
           }
           if (where) {
             data = data.join(', ');
-            var query = dbc.query(
+            const query = dbc.query(
               'UPDATE ' + escapeIdentifier(table) + ' SET ' + data +
-              ' WHERE ' + where, [], function(err, res) {
+              ' WHERE ' + where, [], (err, res) => {
                 callback(err, res ? res.changedRows : false, query);
               }
             );
           } else {
-            var e = new Error(
+            const e = new Error(
               'Error: can not insert into "' + table +
               '" because there is no primary or unique key specified'
             );
@@ -339,18 +341,18 @@ function upgrade(connection) {
       } else {
         where = this.where(where);
         if (where) {
-          var data = [];
-          for (var i in row) data.push(i + '=' + dbc.escape(row[i]));
+          let data = [];
+          for (const i in row) data.push(i + '=' + dbc.escape(row[i]));
           data = data.join(', ');
-          var query = dbc.query(
+          const query = dbc.query(
             'UPDATE ' + escapeIdentifier(table) +
             ' SET ' + data + ' WHERE ' + where, [],
-            function(err, res) {
+            (err, res) => {
               callback(err, res ? res.changedRows : false, query);
             }
           );
         } else {
-          var e = new Error(
+          const e = new Error(
             'Error: can update "' + table +
             '", because "where" parameter is empty'
           );
@@ -363,16 +365,16 @@ function upgrade(connection) {
     // INSERT OR UPDATE SQL statement generator
     //
     connection.upsert = function(table, row, callback) {
-      var dbc = this;
-      dbc.fields(table, function(err, fields) {
+      const dbc = this;
+      dbc.fields(table, (err, fields) => {
         if (err) {
-          var error = new Error('Error: Table "' + table + '" not found');
+          const error = new Error('Error: Table "' + table + '" not found');
           return callback(error);
         }
-        var rowKeys = Object.keys(row),
-            uniqueKey = '',
-            field, fieldName;
-        for (var i in fields) {
+        const rowKeys = Object.keys(row);
+        let uniqueKey = '';
+        let i, field, fieldName;
+        for (i in fields) {
           field = fields[i];
           fieldName = field.Field;
           if (
@@ -387,13 +389,13 @@ function upgrade(connection) {
           dbc.queryValue(
             'SELECT count(*) FROM ' + escapeIdentifier(table) +
             ' WHERE ' + uniqueKey + '=' + dbc.escape(row[uniqueKey]), [],
-            function(err, count) {
+            (err, count) => {
               if (count === 1) dbc.update(table, row, callback);
               else dbc.insert(table, row, callback);
             }
           );
         } else {
-          var e = new Error(
+          const e = new Error(
             'Error: can not insert or update table "' + table +
             '", primary or unique key is not specified'
           );
@@ -407,17 +409,17 @@ function upgrade(connection) {
     //   callback(err, rowCount or false)
     //
     connection.delete = function(table, where, callback) {
-      var dbc = this;
+      const dbc = this;
       where = this.where(where);
       if (where) {
-        var query = dbc.query(
+        const query = dbc.query(
           'DELETE FROM ' + escapeIdentifier(table) + ' WHERE ' + where, [],
-          function(err, res) {
+          (err, res) => {
             callback(err, res ? res.affectedRows : false, query);
           }
         );
       } else {
-        var e = new Error(
+        const e = new Error(
           'Error: can not delete from "' + table +
           '", because "where" parameter is empty'
         );
@@ -442,7 +444,7 @@ function introspection(connection) {
       this.queryRow(
         'SHOW KEYS FROM ' + escapeIdentifier(table) +
         ' WHERE Key_name = "PRIMARY"', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -461,7 +463,7 @@ function introspection(connection) {
         'CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = ? ' +
         'ORDER BY REFERENCED_TABLE_NAME',
         [table],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -479,7 +481,7 @@ function introspection(connection) {
         'WHERE TABLE_NAME = ? ' +
         'ORDER BY CONSTRAINT_NAME',
         [table],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -493,7 +495,7 @@ function introspection(connection) {
       this.queryHash(
         'SHOW FULL COLUMNS FROM ' +
         escapeIdentifier(table), [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -504,7 +506,7 @@ function introspection(connection) {
     //   callback(err, databases)
     //
     connection.databases = function(callback) {
-      this.queryCol('SHOW DATABASES', [], function(err, res) {
+      this.queryCol('SHOW DATABASES', [], (err, res) => {
         if (err) res = false;
         callback(err, res);
       });
@@ -521,7 +523,7 @@ function introspection(connection) {
         'UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, ' +
         'CREATE_OPTIONS, TABLE_COMMENT ' +
         'FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?', [database],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -539,7 +541,7 @@ function introspection(connection) {
         'UPDATE_TIME, CHECK_TIME, TABLE_COLLATION, CHECKSUM, ' +
         'CREATE_OPTIONS, TABLE_COMMENT ' +
         'FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -550,7 +552,7 @@ function introspection(connection) {
     //   callback(err, metadata)
     //
     connection.tableInfo = function(table, callback) {
-      this.queryRow('SHOW TABLE STATUS LIKE ?', [table], function(err, res) {
+      this.queryRow('SHOW TABLE STATUS LIKE ?', [table], (err, res) => {
         if (err) res = false;
         callback(err, res);
       });
@@ -562,11 +564,11 @@ function introspection(connection) {
     connection.indexes = function(table, callback) {
       this.query(
         'SHOW INDEX FROM ' + escapeIdentifier(table), [],
-        function(err, res) {
-          var result = {};
+        (err, res) => {
+          let result = {};
           if (err) result = false; else {
-            var row;
-            for (var i in res) {
+            let row;
+            for (const i in res) {
               row = res[i];
               result[row.Key_name] = row;
             }
@@ -582,7 +584,7 @@ function introspection(connection) {
     connection.processes = function(callback) {
       this.query(
         'SELECT * FROM information_schema.PROCESSLIST', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -595,7 +597,7 @@ function introspection(connection) {
     connection.globalVariables = function(callback) {
       this.queryKeyValue(
         'SELECT * FROM information_schema.GLOBAL_VARIABLES', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -608,7 +610,7 @@ function introspection(connection) {
     connection.globalStatus = function(callback) {
       this.queryKeyValue(
         'SELECT * FROM information_schema.GLOBAL_STATUS', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -621,7 +623,7 @@ function introspection(connection) {
     connection.users = function(callback) {
       this.query(
         'SELECT * FROM mysql.user', [],
-        function(err, res) {
+        (err, res) => {
           if (err) res = false;
           callback(err, res);
         }
@@ -632,6 +634,6 @@ function introspection(connection) {
 }
 
 module.exports = {
-  upgrade: upgrade,
-  introspection: introspection
+  upgrade,
+  introspection,
 };
