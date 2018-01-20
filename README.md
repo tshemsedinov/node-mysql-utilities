@@ -1,6 +1,21 @@
+# Node MySql Utilities
+
+[Utilities](https://github.com/tshemsedinov/node-mysql-utilities) for
+[node-mysql driver](https://github.com/felixge/node-mysql) with specialized
+result types, introspection and other helpful functionality for
+[node.js](http://nodejs.org). Initially this utilities were part of
+[Impress](https://npmjs.org/package/impress) Application Server and
+extracted separately for use with other frameworks.
+
+[![TravisCI](https://travis-ci.org/tshemsedinov/node-mysql-utilities.svg?branch=master)](https://travis-ci.org/tshemsedinov/node-mysql-utilities)
+[![bitHound](https://www.bithound.io/github/tshemsedinov/node-mysql-utilities/badges/score.svg)](https://www.bithound.io/github/tshemsedinov/node-mysql-utilities)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/23e7143d77a0484983cdff30072a5aca)](https://www.codacy.com/app/metarhia/node-mysql-utilities)
+[![NPM Version](https://badge.fury.io/js/mysql-utilities.svg)](https://badge.fury.io/js/mysql-utilities)
+[![NPM Downloads/Month](https://img.shields.io/npm/dm/mysql-utilities.svg)](https://www.npmjs.com/package/mysql-utilities)
+[![NPM Downloads](https://img.shields.io/npm/dt/mysql-utilities.svg)](https://www.npmjs.com/package/mysql-utilities)
+
 ![impress logo](http://habrastorage.org/storage3/747/830/b17/747830b1782bd95f28b8d05eff8e05d9.jpg)
 
-[Utilities](https://github.com/tshemsedinov/node-mysql-utilities) for [node-mysql driver](https://github.com/felixge/node-mysql) with specialized result types, introspection and other helpful functionality for [node.js](http://nodejs.org). Initially this utilities were part of [Impress](https://npmjs.org/package/impress) Application Server and extracted separately for use with other frameworks.
 
 ## Installation
 
@@ -89,7 +104,7 @@ connection.queryRow(
   }
 );
 ```
-Example:
+Output:
 ```js
 queryRow: {
   LanguageId: 3,
@@ -109,7 +124,7 @@ connection.queryValue(
   }
 );
 ```
-Example:
+Output:
 ```js
 { queryValue: 'Italiano' }
 ```
@@ -123,7 +138,7 @@ connection.queryCol(
   }
 );
 ```
-Example:
+Output:
 ```js
 queryArray: [ 'de', 'en', 'es', 'fr', 'it', 'pl', 'ru', 'ua' ]
 ```
@@ -137,8 +152,8 @@ connection.queryHash(
   }
 );
 ```
-Example:
-```
+Output:
+```js
 queryHash: {
   en: {
     LanguageSign: 'en',
@@ -177,7 +192,7 @@ connection.queryKeyValue(
   }
 );
 ```
-Example:
+Output:
 ```js
 keyValue: {
   en: 'English',
@@ -197,7 +212,7 @@ connection.primary('Language', (err, primary) => {
   console.dir({ primary });
 });
 ```
-Example:
+Output:
 ```js
 primary: {
   Table: 'language',
@@ -222,7 +237,7 @@ connection.foreign('TemplateCaption', (err, foreign) => {
   console.dir({ foreign });
 });
 ```
-Example:
+Output:
 ```js
 foreign: {
   fkTemplateCaptionLanguage: {
@@ -249,7 +264,7 @@ connection.constraints('TemplateCaption', (err, constraints) => {
   console.dir({ constraints });
 });
 ```
-Example:
+Output:
 ```js
 constraints: {
   fkTemplateCaptionLanguage: {
@@ -276,7 +291,7 @@ connection.fields('Language', (err, fields) => {
   console.dir({ fields });
 });
 ```
-Example:
+Output:
 ```js
 fields: {
   LanguageId: {
@@ -309,7 +324,7 @@ connection.databases((err, databases) => {
   console.dir({ databases });
 });
 ```
-Example:
+Output:
 ```js
 databases: [ 'information_schema', 'mezha', 'mysql', 'performance_schema', 'test' ]
 ```
@@ -320,7 +335,7 @@ connection.tables((err, tables) => {
   console.dir({ tables });
 });
 ```
-Example:
+Output:
 ```js
 tables: {
   Language: {
@@ -353,8 +368,8 @@ connection.databaseTables('databaseName', (err, tables) => {
   console.dir({ databaseTables: tables });
 });
 ```
-Example:
-```
+Output:
+```js
 tables: {
   Language: {
     TABLE_NAME: 'Language',
@@ -386,8 +401,8 @@ connection.tableInfo('Language', (err, info) => {
   console.dir({ tableInfo: info });
 });
 ```
-Example:
-```
+Output:
+```js
 tableInfo: {
   Name: 'language',
   Engine: 'InnoDB',
@@ -416,7 +431,7 @@ connection.indexes('Language', function(err, info) {
   console.dir({ tableInfo: info });
 });
 ```
-Example:
+Output:
 ```js
 indexes: {
   PRIMARY: {
@@ -457,7 +472,7 @@ connection.processes(function(err, processes) {
   console.dir({ processes });
 });
 ```
-Example:
+Output:
 ```js
 processes: [ {
   ID: 62,
@@ -486,7 +501,7 @@ connection.globalVariables((err, globalVariables) => {
   console.dir({ globalVariables });
 });
 ```
-Example:
+Output:
 ```js
 globalVariables: {
   MAX_PREPARED_STMT_COUNT: '16382',
@@ -506,7 +521,7 @@ connection.globalStatus((err, globalStatus) => {
   console.dir({ globalStatus });
 });
 ```
-Example:
+Output:
 ```js
 globalStatus: {
   ABORTED_CLIENTS: '54',
@@ -528,7 +543,7 @@ connection.users((err, users) => {
   console.dir({ users });
 });
 ```
-Example:
+Output:
 ```js
 users: [
   {
