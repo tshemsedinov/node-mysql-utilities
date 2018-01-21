@@ -55,7 +55,6 @@ const upgrade = (connection) => {
     //     AND label = 'str' AND code IN (1,2,4,10,11)'
     //
     connection.where = function(where) {
-      const dbc = this;
       let result = '';
       let key, value, clause;
       for (key in where) {
@@ -65,38 +64,38 @@ const upgrade = (connection) => {
           clause = key + ' = ' + value;
         } else if (typeof(value) === 'string') {
           if (value.startsWith('>=')) {
-            clause = key + ' >= ' + dbc.escape(value.substring(2));
+            clause = key + ' >= ' + this.escape(value.substring(2));
           } else if (value.startsWith('<=')) {
-            clause = key + ' <= ' + dbc.escape(value.substring(2));
+            clause = key + ' <= ' + this.escape(value.substring(2));
           } else if (value.startsWith('<>')) {
-            clause = key + ' <> ' + dbc.escape(value.substring(2));
+            clause = key + ' <> ' + this.escape(value.substring(2));
           } else if (value.startsWith('>')) {
-            clause = key + ' > ' + dbc.escape(value.substring(1));
+            clause = key + ' > ' + this.escape(value.substring(1));
           } else if (value.startsWith('<')) {
-            clause = key + ' < ' + dbc.escape(value.substring(1));
+            clause = key + ' < ' + this.escape(value.substring(1));
           } else if (value.startsWith('(')) {
             clause = (
               key + ' IN (' + (value
                 .substr(1, value.length - 2)
                 .split(',')
-                .map(s => dbc.escape(s))
+                .map(s => this.escape(s))
               ).join(',') + ')'
             );
           } else if (value.indexOf('..') !== -1) {
             value = value.split('..');
             clause = (
               '(' + key + ' BETWEEN ' +
-              dbc.escape(value[0]) + ' AND ' +
-              dbc.escape(value[1]) + ')'
+              this.escape(value[0]) + ' AND ' +
+              this.escape(value[1]) + ')'
             );
           } else if (
             value.indexOf('*') !== -1 ||
             value.indexOf('?') !== -1
           ) {
             value = value.replace(/\*/g, '%').replace(/\?/g, '_');
-            clause = key + ' LIKE ' + dbc.escape(value);
+            clause = key + ' LIKE ' + this.escape(value);
           } else {
-            clause = key + ' = ' + dbc.escape(value);
+            clause = key + ' = ' + this.escape(value);
           }
         }
         result = result ? (result + ' AND ' + clause) : clause;
@@ -258,8 +257,7 @@ const upgrade = (connection) => {
     //   callback(err, id or false)
     //
     connection.insert = function(table, row, callback) {
-      const dbc = this;
-      dbc.fields(table, (err, fields) => {
+      this.fields(table, (err, fields) => {
         if (err) {
           return callback(
             new Error(
@@ -269,21 +267,20 @@ const upgrade = (connection) => {
         }
         fields = Object.keys(fields);
         const rowKeys = Object.keys(row);
-        let values = [];
-        let columns = [];
+        const values = [];
+        const columns = [];
         let i, field;
         for (i in fields) {
           field = fields[i];
           if (rowKeys.indexOf(field) !== -1) {
             columns.push(field);
-            values.push(dbc.escape(row[field]));
+            values.push(this.escape(row[field]));
           }
         }
-        values = values.join(', ');
-        columns = columns.join(', ');
-        const query = dbc.query(
+        const query = this.query(
           'INSERT INTO ' + escapeIdentifier(table) +
-          ' (' + columns + ') VALUES (' + values + ')',
+          ' (' + columns.join(', ') + ') VALUES (' +
+          values.join(', ') + ')',
           [], (err, res) => {
             callback(err, res ? res.insertId : false, query);
           }
@@ -294,16 +291,15 @@ const upgrade = (connection) => {
     // UPDATE SQL statement generator
     //
     connection.update = function(table, row, where, callback) {
-      const dbc = this;
       if (typeof(where) === 'function') {
         callback = where;
-        dbc.fields(table, (err, fields) => {
+        this.fields(table, (err, fields) => {
           if (err) {
             const error = new Error('Error: Table "' + table + '" not found');
             return callback(error);
           }
           let where = '';
-          let data = [];
+          const data = [];
           const rowKeys = Object.keys(row);
           let i, field, fieldName;
           for (i in fields) {
@@ -311,16 +307,15 @@ const upgrade = (connection) => {
             fieldName = field.Field;
             if (rowKeys.indexOf(fieldName) !== -1) {
               if (!where && (field.Key === 'PRI' || field.Key === 'UNI')) {
-                where = fieldName + '=' + dbc.escape(row[fieldName]);
+                where = fieldName + '=' + this.escape(row[fieldName]);
               } else {
-                data.push(fieldName + '=' + dbc.escape(row[fieldName]));
+                data.push(fieldName + '=' + this.escape(row[fieldName]));
               }
             }
           }
           if (where) {
-            data = data.join(', ');
-            const query = dbc.query(
-              'UPDATE ' + escapeIdentifier(table) + ' SET ' + data +
+            const query = this.query(
+              'UPDATE ' + escapeIdentifier(table) + ' SET ' + data.join(', ') +
               ' WHERE ' + where, [], (err, res) => {
                 callback(err, res ? res.changedRows : false, query);
               }
@@ -330,20 +325,19 @@ const upgrade = (connection) => {
               'Error: can not insert into "' + table +
               '" because there is no primary or unique key specified'
             );
-            dbc.emit('error', e);
+            this.emit('error', e);
             callback(e, false);
           }
         });
       } else {
         where = this.where(where);
         if (where) {
-          let data = [];
+          const data = [];
           let i;
-          for (i in row) data.push(i + '=' + dbc.escape(row[i]));
-          data = data.join(', ');
-          const query = dbc.query(
+          for (i in row) data.push(i + '=' + this.escape(row[i]));
+          const query = this.query(
             'UPDATE ' + escapeIdentifier(table) +
-            ' SET ' + data + ' WHERE ' + where, [],
+            ' SET ' + data.join(', ') + ' WHERE ' + where, [],
             (err, res) => {
               callback(err, res ? res.changedRows : false, query);
             }
@@ -353,7 +347,7 @@ const upgrade = (connection) => {
             'Error: can update "' + table +
             '", because "where" parameter is empty'
           );
-          dbc.emit('error', e);
+          this.emit('error', e);
           callback(e, false);
         }
       }
@@ -362,8 +356,7 @@ const upgrade = (connection) => {
     // INSERT OR UPDATE SQL statement generator
     //
     connection.upsert = function(table, row, callback) {
-      const dbc = this;
-      dbc.fields(table, (err, fields) => {
+      this.fields(table, (err, fields) => {
         if (err) {
           const error = new Error('Error: Table "' + table + '" not found');
           return callback(error);
@@ -383,12 +376,12 @@ const upgrade = (connection) => {
           }
         }
         if (rowKeys.indexOf(uniqueKey) !== -1) {
-          dbc.queryValue(
+          this.queryValue(
             'SELECT count(*) FROM ' + escapeIdentifier(table) +
-            ' WHERE ' + uniqueKey + '=' + dbc.escape(row[uniqueKey]), [],
+            ' WHERE ' + uniqueKey + '=' + this.escape(row[uniqueKey]), [],
             (err, count) => {
-              if (count === 1) dbc.update(table, row, callback);
-              else dbc.insert(table, row, callback);
+              if (count === 1) this.update(table, row, callback);
+              else this.insert(table, row, callback);
             }
           );
         } else {
@@ -396,7 +389,7 @@ const upgrade = (connection) => {
             'Error: can not insert or update table "' + table +
             '", primary or unique key is not specified'
           );
-          dbc.emit('error', e);
+          this.emit('error', e);
           callback(e, false);
         }
       });
@@ -406,10 +399,9 @@ const upgrade = (connection) => {
     //   callback(err, rowCount or false)
     //
     connection.delete = function(table, where, callback) {
-      const dbc = this;
       where = this.where(where);
       if (where) {
-        const query = dbc.query(
+        const query = this.query(
           'DELETE FROM ' + escapeIdentifier(table) + ' WHERE ' + where, [],
           (err, res) => {
             callback(err, res ? res.affectedRows : false, query);
@@ -420,7 +412,7 @@ const upgrade = (connection) => {
           'Error: can not delete from "' + table +
           '", because "where" parameter is empty'
         );
-        dbc.emit('error', e);
+        this.emit('error', e);
         callback(e, false);
       }
     };
