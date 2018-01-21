@@ -81,17 +81,14 @@ const upgrade = (connection) => {
                 .map(s => this.escape(s))
               ).join(',') + ')'
             );
-          } else if (value.indexOf('..') !== -1) {
+          } else if (value.includes('..')) {
             value = value.split('..');
             clause = (
               '(' + key + ' BETWEEN ' +
               this.escape(value[0]) + ' AND ' +
               this.escape(value[1]) + ')'
             );
-          } else if (
-            value.indexOf('*') !== -1 ||
-            value.indexOf('?') !== -1
-          ) {
+          } else if (value.includes('*') || value.includes('?')) {
             value = value.replace(/\*/g, '%').replace(/\?/g, '_');
             clause = key + ' LIKE ' + this.escape(value);
           } else {
@@ -272,7 +269,7 @@ const upgrade = (connection) => {
         let i, field;
         for (i in fields) {
           field = fields[i];
-          if (rowKeys.indexOf(field) !== -1) {
+          if (rowKeys.includes(field)) {
             columns.push(field);
             values.push(this.escape(row[field]));
           }
@@ -305,7 +302,7 @@ const upgrade = (connection) => {
           for (i in fields) {
             field = fields[i];
             fieldName = field.Field;
-            if (rowKeys.indexOf(fieldName) !== -1) {
+            if (rowKeys.includes(fieldName)) {
               if (!where && (field.Key === 'PRI' || field.Key === 'UNI')) {
                 where = fieldName + '=' + this.escape(row[fieldName]);
               } else {
@@ -370,12 +367,12 @@ const upgrade = (connection) => {
           if (
             !uniqueKey &&
             (field.Key === 'PRI' || field.Key === 'UNI') &&
-            rowKeys.indexOf(fieldName) !== -1
+            rowKeys.includes(fieldName)
           ) {
             uniqueKey = fieldName;
           }
         }
-        if (rowKeys.indexOf(uniqueKey) !== -1) {
+        if (rowKeys.includes(uniqueKey)) {
           this.queryValue(
             'SELECT count(*) FROM ' + escapeIdentifier(table) +
             ' WHERE ' + uniqueKey + '=' + this.escape(row[uniqueKey]), [],
