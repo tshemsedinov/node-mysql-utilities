@@ -57,8 +57,8 @@ const upgrade = (connection) => {
     connection.where = function(where) {
       const dbc = this;
       let result = '';
-      let value, clause;
-      for (const key in where) {
+      let key, value, clause;
+      for (key in where) {
         value = where[key];
         clause = key;
         if (typeof(value) === 'number') {
@@ -110,8 +110,8 @@ const upgrade = (connection) => {
     //
     connection.order = function(order) {
       const result = [];
-      let val, clause;
-      for (const key in order) {
+      let key, val, clause;
+      for (key in order) {
         val = order[key];
         clause = key;
         result.push(clause + ' ' + val);
@@ -169,8 +169,8 @@ const upgrade = (connection) => {
       return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         const result = [];
-        let row;
-        for (const i in res) {
+        let i, row;
+        for (i in res) {
           row = res[i];
           result.push(row[Object.keys(row)[0]]);
         }
@@ -188,8 +188,8 @@ const upgrade = (connection) => {
       return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         const result = {};
-        let row;
-        for (const i in res) {
+        let i, row;
+        for (i in res) {
           row = res[i];
           result[row[Object.keys(row)[0]]] = row;
         }
@@ -305,8 +305,8 @@ const upgrade = (connection) => {
           let where = '';
           let data = [];
           const rowKeys = Object.keys(row);
-          let field, fieldName;
-          for (const i in fields) {
+          let i, field, fieldName;
+          for (i in fields) {
             field = fields[i];
             fieldName = field.Field;
             if (rowKeys.indexOf(fieldName) !== -1) {
@@ -338,7 +338,8 @@ const upgrade = (connection) => {
         where = this.where(where);
         if (where) {
           let data = [];
-          for (const i in row) data.push(i + '=' + dbc.escape(row[i]));
+          let i;
+          for (i in row) data.push(i + '=' + dbc.escape(row[i]));
           data = data.join(', ');
           const query = dbc.query(
             'UPDATE ' + escapeIdentifier(table) +
@@ -563,8 +564,8 @@ const introspection = (connection) => {
         (err, res) => {
           let result = {};
           if (err) result = false; else {
-            let row;
-            for (const i in res) {
+            let i, row;
+            for (i in res) {
               row = res[i];
               result[row.Key_name] = row;
             }
