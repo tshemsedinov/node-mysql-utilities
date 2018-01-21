@@ -5,7 +5,7 @@ const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 const escapeIdentifier = (str, quote) => {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
-  else return quote + str + quote;
+  return quote + str + quote;
 };
 
 if (typeof(Function.prototype.override) !== 'function') {
@@ -113,7 +113,7 @@ const upgrade = (connection) => {
         result.push(clause + ' ' + val);
       }
       if (result.length) return result.join();
-      else return '';
+      return '';
     };
 
     // Record count
@@ -165,10 +165,11 @@ const upgrade = (connection) => {
       return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         const result = [];
-        let i, row;
+        let i, row, keys;
         for (i in res) {
           row = res[i];
-          result.push(row[Object.keys(row)[0]]);
+          keys = Object.keys(row);
+          result.push(row[keys[0]]);
         }
         callback(err, result, fields);
       });
@@ -184,10 +185,11 @@ const upgrade = (connection) => {
       return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         const result = {};
-        let i, row;
+        let i, row, keys;
         for (i in res) {
           row = res[i];
-          result[row[Object.keys(row)[0]]] = row;
+          keys = Object.keys(row);
+          result[row[keys[0]]] = row;
         }
         callback(err, result, fields);
       });
@@ -204,10 +206,11 @@ const upgrade = (connection) => {
       return this.query(sql, values, (err, res, fields) => {
         if (err) return callback(err);
         const result = {};
-        let i, row;
+        let i, row, keys;
         for (i in res) {
           row = res[i];
-          result[row[Object.keys(row)[0]]] = row[Object.keys(row)[1]];
+          keys = Object.keys(row);
+          result[row[keys[0]]] = row[keys[1]];
         }
         callback(err, result, fields);
       });
@@ -552,12 +555,14 @@ const introspection = (connection) => {
         'SHOW INDEX FROM ' + escapeIdentifier(table), [],
         (err, res) => {
           let result = {};
-          if (err) result = false; else {
-            let i, row;
-            for (i in res) {
-              row = res[i];
-              result[row.Key_name] = row;
-            }
+          if (err) {
+            callback(err, false);
+            return;
+          }
+          let i, row;
+          for (i in res) {
+            row = res[i];
+            result[row.Key_name] = row;
           }
           callback(err, result);
         }
