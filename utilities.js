@@ -482,8 +482,8 @@ const introspection = (connection) => {
     //
     connection.fields = function(table, callback) {
       this.queryHash(
-        'SHOW FULL COLUMNS FROM ' +
-        escapeIdentifier(table), [],
+        'SHOW FULL COLUMNS FROM `' +
+        escapeIdentifier(table) +'`', [],
         (err, res) => {
           if (err) res = false;
           callback(err, res);
