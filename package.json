@@ -3,6 +3,7 @@
   "version": "1.0.12",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
+  "license": "MIT",
   "keywords": [
     "mysql",
     "utilities",
