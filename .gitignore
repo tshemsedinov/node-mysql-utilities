@@ -1,3 +1,3 @@
 node_modules
-debug
-npm-debug.log
+*.log
+.DS_Store
