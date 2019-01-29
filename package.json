@@ -1,6 +1,6 @@
 {
   "name": "mysql-utilities",
-  "version": "1.0.13",
+  "version": "1.1.0-alpha.0",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
   "license": "MIT",
@@ -24,9 +24,9 @@
     "node": ">= 6.0.0"
   },
   "dependencies": {
-    "mysql": "2.15.x"
+    "mysql": "^2.16.0"
   },
   "devDependencies": {
-    "eslint": "^4.19.1"
+    "eslint": "^5.12.1"
   }
 }
