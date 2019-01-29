@@ -188,4 +188,6 @@ connection.users((err, users) => {
   console.dir({ users });
 });
 
-setTimeout(() => { connection.end(); }, 2000);
+setTimeout(() => {
+  connection.end();
+}, 2000);
