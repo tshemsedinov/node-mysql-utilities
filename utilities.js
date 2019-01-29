@@ -18,7 +18,7 @@ if (typeof Function.prototype.override !== 'function') {
   };
 }
 
-const upgrade = (connection) => {
+const upgrade = connection => {
 
   if (!connection._mixedUpgrade) {
 
@@ -420,7 +420,7 @@ const upgrade = (connection) => {
   }
 };
 
-const introspection = (connection) => {
+const introspection = connection => {
 
   if (!connection._mixedIntrospection) {
 
