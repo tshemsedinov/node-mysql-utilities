@@ -8,7 +8,7 @@ const escapeIdentifier = (str, quote) => {
   return quote + str + quote;
 };
 
-if (typeof(Function.prototype.override) !== 'function') {
+if (typeof Function.prototype.override !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
     return function() {
@@ -28,7 +28,7 @@ const upgrade = (connection) => {
     connection.query = connection.query.override(
       function(sql, values, callback) {
         const startTime = new Date().getTime();
-        if (typeof(values) === 'function') {
+        if (typeof values === 'function') {
           callback = values;
           values = [];
         }
@@ -60,9 +60,9 @@ const upgrade = (connection) => {
       for (key in where) {
         value = where[key];
         clause = key;
-        if (typeof(value) === 'number') {
+        if (typeof value === 'number') {
           clause = key + ' = ' + value;
-        } else if (typeof(value) === 'string') {
+        } else if (typeof value === 'string') {
           if (value.startsWith('>=')) {
             clause = key + ' >= ' + this.escape(value.substring(2));
           } else if (value.startsWith('<=')) {
@@ -130,7 +130,7 @@ const upgrade = (connection) => {
     // Returns single row as associative array of fields
     //
     connection.queryRow = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
@@ -144,7 +144,7 @@ const upgrade = (connection) => {
     // Returns single value (scalar)
     //
     connection.queryValue = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
@@ -158,7 +158,7 @@ const upgrade = (connection) => {
     // Query returning array of column field values
     //
     connection.queryCol = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
@@ -178,7 +178,7 @@ const upgrade = (connection) => {
     // Query returning hash (associative array), first field will be array key
     //
     connection.queryHash = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
@@ -199,7 +199,7 @@ const upgrade = (connection) => {
     // first field of query will be key and second will be value
     //
     connection.queryKeyValue = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
@@ -220,7 +220,7 @@ const upgrade = (connection) => {
     //
     connection.select = function(table, fields, where, order, callback) {
       where = this.where(where);
-      if (typeof(order) === 'function') {
+      if (typeof order === 'function') {
         callback = order;
         order = {};
       }
@@ -239,7 +239,7 @@ const upgrade = (connection) => {
       table, fields, limit, where, order, callback
     ) {
       where = this.where(where);
-      if (typeof(order) === 'function') {
+      if (typeof order === 'function') {
         callback = order;
         order = {};
       }
@@ -291,7 +291,7 @@ const upgrade = (connection) => {
     // UPDATE SQL statement generator
     //
     connection.update = function(table, row, where, callback) {
-      if (typeof(where) === 'function') {
+      if (typeof where === 'function') {
         callback = where;
         this.fields(table, (err, fields) => {
           if (err) {
