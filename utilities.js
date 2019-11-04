@@ -2,13 +2,17 @@
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
-const escapeIdentifier = (str, quote) => {
+function escapeIdentifier(str, quote) {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
-  return quote + str + quote;
-};
+  else return quote + str + quote;
+}
 
-if (typeof Function.prototype.override !== 'function') {
+function startsWith(value, str) {
+  return value.slice(0, str.length) === str;
+}
+
+if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
     return function() {
@@ -18,7 +22,7 @@ if (typeof Function.prototype.override !== 'function') {
   };
 }
 
-const upgrade = connection => {
+function upgrade(connection) {
 
   if (!connection._mixedUpgrade) {
 
@@ -28,7 +32,7 @@ const upgrade = connection => {
     connection.query = connection.query.override(
       function(sql, values, callback) {
         const startTime = new Date().getTime();
-        if (typeof values === 'function') {
+        if (typeof(values) === 'function') {
           callback = values;
           values = [];
         }
@@ -60,20 +64,20 @@ const upgrade = connection => {
       for (key in where) {
         value = where[key];
         clause = key;
-        if (typeof value === 'number') {
+        if (typeof(value) === 'number') {
           clause = key + ' = ' + value;
-        } else if (typeof value === 'string') {
-          if (value.startsWith('>=')) {
+        } else if (typeof(value) === 'string') {
+          if (startsWith(value, '>=')) {
             clause = key + ' >= ' + this.escape(value.substring(2));
-          } else if (value.startsWith('<=')) {
+          } else if (startsWith(value, '<=')) {
             clause = key + ' <= ' + this.escape(value.substring(2));
-          } else if (value.startsWith('<>')) {
+          } else if (startsWith(value, '<>')) {
             clause = key + ' <> ' + this.escape(value.substring(2));
-          } else if (value.startsWith('>')) {
+          } else if (startsWith(value, '>')) {
             clause = key + ' > ' + this.escape(value.substring(1));
-          } else if (value.startsWith('<')) {
+          } else if (startsWith(value, '<')) {
             clause = key + ' < ' + this.escape(value.substring(1));
-          } else if (value.startsWith('(')) {
+          } else if (startsWith(value, '(')) {
             clause = (
               key + ' IN (' + (value
                 .substr(1, value.length - 2)
@@ -81,14 +85,14 @@ const upgrade = connection => {
                 .map(s => this.escape(s))
               ).join(',') + ')'
             );
-          } else if (value.includes('..')) {
+          } else if (value.indexOf('..') !== -1) {
             value = value.split('..');
             clause = (
               '(' + key + ' BETWEEN ' +
               this.escape(value[0]) + ' AND ' +
               this.escape(value[1]) + ')'
             );
-          } else if (value.includes('*') || value.includes('?')) {
+          } else if (value.indexOf('*') !== -1 || value.indexOf('?') !== -1) {
             value = value.replace(/\*/g, '%').replace(/\?/g, '_');
             clause = key + ' LIKE ' + this.escape(value);
           } else {
@@ -113,7 +117,7 @@ const upgrade = connection => {
         result.push(clause + ' ' + val);
       }
       if (result.length) return result.join();
-      return '';
+      else return '';
     };
 
     // Record count
@@ -130,7 +134,7 @@ const upgrade = connection => {
     // Returns single row as associative array of fields
     //
     connection.queryRow = function(sql, values, callback) {
-      if (typeof values === 'function') {
+      if (typeof(values) === 'function') {
         callback = values;
         values = [];
       }
@@ -144,7 +148,7 @@ const upgrade = connection => {
     // Returns single value (scalar)
     //
     connection.queryValue = function(sql, values, callback) {
-      if (typeof values === 'function') {
+      if (typeof(values) === 'function') {
         callback = values;
         values = [];
       }
@@ -158,7 +162,7 @@ const upgrade = connection => {
     // Query returning array of column field values
     //
     connection.queryCol = function(sql, values, callback) {
-      if (typeof values === 'function') {
+      if (typeof(values) === 'function') {
         callback = values;
         values = [];
       }
@@ -178,7 +182,7 @@ const upgrade = connection => {
     // Query returning hash (associative array), first field will be array key
     //
     connection.queryHash = function(sql, values, callback) {
-      if (typeof values === 'function') {
+      if (typeof(values) === 'function') {
         callback = values;
         values = [];
       }
@@ -199,7 +203,7 @@ const upgrade = connection => {
     // first field of query will be key and second will be value
     //
     connection.queryKeyValue = function(sql, values, callback) {
-      if (typeof values === 'function') {
+      if (typeof(values) === 'function') {
         callback = values;
         values = [];
       }
@@ -220,7 +224,7 @@ const upgrade = connection => {
     //
     connection.select = function(table, fields, where, order, callback) {
       where = this.where(where);
-      if (typeof order === 'function') {
+      if (typeof(order) === 'function') {
         callback = order;
         order = {};
       }
@@ -239,7 +243,7 @@ const upgrade = connection => {
       table, fields, limit, where, order, callback
     ) {
       where = this.where(where);
-      if (typeof order === 'function') {
+      if (typeof(order) === 'function') {
         callback = order;
         order = {};
       }
@@ -272,7 +276,7 @@ const upgrade = connection => {
         let i, field;
         for (i in fields) {
           field = fields[i];
-          if (rowKeys.includes(field)) {
+          if (rowKeys.indexOf(field) !== -1) {
             columns.push(field);
             values.push(this.escape(row[field]));
           }
@@ -291,7 +295,7 @@ const upgrade = connection => {
     // UPDATE SQL statement generator
     //
     connection.update = function(table, row, where, callback) {
-      if (typeof where === 'function') {
+      if (typeof(where) === 'function') {
         callback = where;
         this.fields(table, (err, fields) => {
           if (err) {
@@ -305,7 +309,7 @@ const upgrade = connection => {
           for (i in fields) {
             field = fields[i];
             fieldName = field.Field;
-            if (rowKeys.includes(fieldName)) {
+            if (rowKeys.indexOf(fieldName) !== -1) {
               if (!where && (field.Key === 'PRI' || field.Key === 'UNI')) {
                 where = fieldName + '=' + this.escape(row[fieldName]);
               } else {
@@ -370,12 +374,12 @@ const upgrade = connection => {
           if (
             !uniqueKey &&
             (field.Key === 'PRI' || field.Key === 'UNI') &&
-            rowKeys.includes(fieldName)
+            rowKeys.indexOf(fieldName) !== -1
           ) {
             uniqueKey = fieldName;
           }
         }
-        if (rowKeys.includes(uniqueKey)) {
+        if (rowKeys.indexOf(uniqueKey) !== -1) {
           this.queryValue(
             'SELECT count(*) FROM ' + escapeIdentifier(table) +
             ' WHERE ' + uniqueKey + '=' + this.escape(row[uniqueKey]), [],
@@ -418,9 +422,9 @@ const upgrade = connection => {
     };
 
   }
-};
+}
 
-const introspection = connection => {
+function introspection(connection) {
 
   if (!connection._mixedIntrospection) {
 
@@ -622,9 +626,6 @@ const introspection = connection => {
     };
 
   }
-};
+}
 
-module.exports = {
-  upgrade,
-  introspection,
-};
+module.exports = { upgrade, introspection };
