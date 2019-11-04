@@ -18,6 +18,29 @@ if (typeof Function.prototype.override !== 'function') {
   };
 }
 
+const buildCondition = (key, value, esc) => {
+  for (const operator of ['>=', '<=', '<>', '>', '<']) {
+    if (value.startsWith(operator)) {
+      const s = value.substring(operator.length);
+      return `${key} ${operator} ${esc(s)}`;
+    }
+  }
+  if (value.startsWith('(')) {
+    const list = value.substr(1, value.length - 2).split(',');
+    const set = list.map(s => esc(s)).join(',');
+    return `${key} IN (${set})`;
+  }
+  if (value.includes('..')) {
+    const [begin, end] = value.split('..');
+    return `(${key} BETWEEN ${begin} AND ${end})`;
+  }
+  if (value.includes('*') || value.includes('?')) {
+    const val = value.replace(/\*/g, '%').replace(/\?/g, '_');
+    return `${key} LIKE ${esc(val)}`;
+  }
+  return `${key} = ${esc(value)}`;
+};
+
 const upgrade = connection => {
 
   if (!connection._mixedUpgrade) {
@@ -55,49 +78,16 @@ const upgrade = connection => {
     //     AND label = 'str' AND code IN (1,2,4,10,11)'
     //
     connection.where = function(where) {
-      let result = '';
-      let key, value, clause;
-      for (key in where) {
-        value = where[key];
-        clause = key;
+      const result = [];
+      for (const key in where) {
+        const value = where[key];
         if (typeof value === 'number') {
-          clause = key + ' = ' + value;
+          result.push(`${key} = ${value.toString()}`);
         } else if (typeof value === 'string') {
-          if (value.startsWith('>=')) {
-            clause = key + ' >= ' + this.escape(value.substring(2));
-          } else if (value.startsWith('<=')) {
-            clause = key + ' <= ' + this.escape(value.substring(2));
-          } else if (value.startsWith('<>')) {
-            clause = key + ' <> ' + this.escape(value.substring(2));
-          } else if (value.startsWith('>')) {
-            clause = key + ' > ' + this.escape(value.substring(1));
-          } else if (value.startsWith('<')) {
-            clause = key + ' < ' + this.escape(value.substring(1));
-          } else if (value.startsWith('(')) {
-            clause = (
-              key + ' IN (' + (value
-                .substr(1, value.length - 2)
-                .split(',')
-                .map(s => this.escape(s))
-              ).join(',') + ')'
-            );
-          } else if (value.includes('..')) {
-            value = value.split('..');
-            clause = (
-              '(' + key + ' BETWEEN ' +
-              this.escape(value[0]) + ' AND ' +
-              this.escape(value[1]) + ')'
-            );
-          } else if (value.includes('*') || value.includes('?')) {
-            value = value.replace(/\*/g, '%').replace(/\?/g, '_');
-            clause = key + ' LIKE ' + this.escape(value);
-          } else {
-            clause = key + ' = ' + this.escape(value);
-          }
+          result.push(buildCondition(value, this.escape));
         }
-        result = result ? (result + ' AND ' + clause) : clause;
       }
-      return result;
+      return result.join(' AND ');
     };
 
     // Order builder
