@@ -84,7 +84,7 @@ const upgrade = connection => {
         if (typeof value === 'number') {
           result.push(`${key} = ${value.toString()}`);
         } else if (typeof value === 'string') {
-          result.push(buildCondition(value, this.escape));
+          result.push(buildCondition(key, value, this.escape));
         }
       }
       return result.join(' AND ');
