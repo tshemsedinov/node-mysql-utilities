@@ -2,15 +2,13 @@
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
-function escapeIdentifier(str, quote) {
+const escapeIdentifier = (str, quote) => {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
   else return quote + str + quote;
-}
+};
 
-function startsWith(value, str) {
-  return value.slice(0, str.length) === str;
-}
+const startsWith = (value, str) => value.slice(0, str.length) === str;
 
 if (typeof(Function.prototype.override) !== 'function') {
   Function.prototype.override = function(fn) {
@@ -22,7 +20,7 @@ if (typeof(Function.prototype.override) !== 'function') {
   };
 }
 
-function upgrade(connection) {
+const upgrade = connection => {
 
   if (!connection._mixedUpgrade) {
 
@@ -422,9 +420,9 @@ function upgrade(connection) {
     };
 
   }
-}
+};
 
-function introspection(connection) {
+const introspection = connection => {
 
   if (!connection._mixedIntrospection) {
 
@@ -626,6 +624,6 @@ function introspection(connection) {
     };
 
   }
-}
+};
 
 module.exports = { upgrade, introspection };
