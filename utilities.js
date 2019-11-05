@@ -2,17 +2,15 @@
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
-function escapeIdentifier(str, quote) {
+const escapeIdentifier = (str, quote) => {
   quote = quote || '`';
   if (identifierRegexp.test(str)) return str;
   else return quote + str + quote;
-}
+};
 
-function startsWith(value, str) {
-  return value.slice(0, str.length) === str;
-}
+const startsWith = (value, str) => value.slice(0, str.length) === str;
 
-if (typeof(Function.prototype.override) !== 'function') {
+if (typeof Function.prototype.override !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
     return function() {
@@ -22,7 +20,7 @@ if (typeof(Function.prototype.override) !== 'function') {
   };
 }
 
-function upgrade(connection) {
+const upgrade = connection => {
 
   if (!connection._mixedUpgrade) {
 
@@ -32,7 +30,7 @@ function upgrade(connection) {
     connection.query = connection.query.override(
       function(sql, values, callback) {
         const startTime = new Date().getTime();
-        if (typeof(values) === 'function') {
+        if (typeof values === 'function') {
           callback = values;
           values = [];
         }
@@ -64,9 +62,9 @@ function upgrade(connection) {
       for (key in where) {
         value = where[key];
         clause = key;
-        if (typeof(value) === 'number') {
+        if (typeof value === 'number') {
           clause = key + ' = ' + value;
-        } else if (typeof(value) === 'string') {
+        } else if (typeof value === 'string') {
           if (startsWith(value, '>=')) {
             clause = key + ' >= ' + this.escape(value.substring(2));
           } else if (startsWith(value, '<=')) {
@@ -134,12 +132,15 @@ function upgrade(connection) {
     // Returns single row as associative array of fields
     //
     connection.queryRow = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         res = res[0] ? res[0] : false;
         callback(err, res, fields);
       });
@@ -148,12 +149,15 @@ function upgrade(connection) {
     // Returns single value (scalar)
     //
     connection.queryValue = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
       return this.queryRow(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const value = res[Object.keys(res)[0]];
         callback(err, value, fields);
       });
@@ -162,12 +166,15 @@ function upgrade(connection) {
     // Query returning array of column field values
     //
     connection.queryCol = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = [];
         let i, row, keys;
         for (i in res) {
@@ -182,12 +189,15 @@ function upgrade(connection) {
     // Query returning hash (associative array), first field will be array key
     //
     connection.queryHash = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -203,12 +213,15 @@ function upgrade(connection) {
     // first field of query will be key and second will be value
     //
     connection.queryKeyValue = function(sql, values, callback) {
-      if (typeof(values) === 'function') {
+      if (typeof values === 'function') {
         callback = values;
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -224,7 +237,7 @@ function upgrade(connection) {
     //
     connection.select = function(table, fields, where, order, callback) {
       where = this.where(where);
-      if (typeof(order) === 'function') {
+      if (typeof order === 'function') {
         callback = order;
         order = {};
       }
@@ -243,7 +256,7 @@ function upgrade(connection) {
       table, fields, limit, where, order, callback
     ) {
       where = this.where(where);
-      if (typeof(order) === 'function') {
+      if (typeof order === 'function') {
         callback = order;
         order = {};
       }
@@ -263,11 +276,12 @@ function upgrade(connection) {
     connection.insert = function(table, row, callback) {
       this.fields(table, (err, fields) => {
         if (err) {
-          return callback(
+          callback(
             new Error(
               'Error: Table "' + table + '" not found'
             ), false
           );
+          return;
         }
         fields = Object.keys(fields);
         const rowKeys = Object.keys(row);
@@ -295,12 +309,13 @@ function upgrade(connection) {
     // UPDATE SQL statement generator
     //
     connection.update = function(table, row, where, callback) {
-      if (typeof(where) === 'function') {
+      if (typeof where === 'function') {
         callback = where;
         this.fields(table, (err, fields) => {
           if (err) {
             const error = new Error('Error: Table "' + table + '" not found');
-            return callback(error);
+            callback(error);
+            return;
           }
           let where = '';
           const data = [];
@@ -363,7 +378,8 @@ function upgrade(connection) {
       this.fields(table, (err, fields) => {
         if (err) {
           const error = new Error('Error: Table "' + table + '" not found');
-          return callback(error);
+          callback(error);
+          return;
         }
         const rowKeys = Object.keys(row);
         let uniqueKey = '';
@@ -422,9 +438,9 @@ function upgrade(connection) {
     };
 
   }
-}
+};
 
-function introspection(connection) {
+const introspection = connection => {
 
   if (!connection._mixedIntrospection) {
 
@@ -626,6 +642,6 @@ function introspection(connection) {
     };
 
   }
-}
+};
 
 module.exports = { upgrade, introspection };
