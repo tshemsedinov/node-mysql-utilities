@@ -8,7 +8,30 @@ const escapeIdentifier = (str, quote) => {
   else return quote + str + quote;
 };
 
-const startsWith = (value, str) => value.slice(0, str.length) === str;
+const operators = ['>=', '<=', '<>', '>', '<'];
+
+const stringClause = (key, value, esc) => {
+  for (const operator of operators) {
+    const len = operator.length;
+    if (value.startsWith(operator)) {
+      return ` ${operator} ${esc(value.substring(len))}`;
+    }
+  }
+  if (value.startsWith('(')) {
+    const items = value.substr(1, value.length - 2);
+    const vals = items.split(',').map(esc).join(',');
+    return `${key} IN (${vals})`;
+  }
+  if (value.includes('..')) {
+    const [start, end] = value.split('..');
+    return `(${key} BETWEEN ${esc(start)} AND ${esc(end)})`;
+  }
+  if (value.includes('*') || value.includes('?')) {
+    const pattern = value.replace(/\*/g, '%').replace(/\?/g, '_');
+    return `${key} LIKE ${esc(pattern)}`;
+  }
+  return `${key} = ${esc(value)}`;
+};
 
 if (typeof Function.prototype.override !== 'function') {
   Function.prototype.override = function(fn) {
@@ -58,44 +81,14 @@ const upgrade = connection => {
     //
     connection.where = function(where) {
       let result = '';
-      let key, value, clause;
+      let key, value;
       for (key in where) {
         value = where[key];
-        clause = key;
+        let clause;
         if (typeof value === 'number') {
           clause = key + ' = ' + value;
         } else if (typeof value === 'string') {
-          if (startsWith(value, '>=')) {
-            clause = key + ' >= ' + this.escape(value.substring(2));
-          } else if (startsWith(value, '<=')) {
-            clause = key + ' <= ' + this.escape(value.substring(2));
-          } else if (startsWith(value, '<>')) {
-            clause = key + ' <> ' + this.escape(value.substring(2));
-          } else if (startsWith(value, '>')) {
-            clause = key + ' > ' + this.escape(value.substring(1));
-          } else if (startsWith(value, '<')) {
-            clause = key + ' < ' + this.escape(value.substring(1));
-          } else if (startsWith(value, '(')) {
-            clause = (
-              key + ' IN (' + (value
-                .substr(1, value.length - 2)
-                .split(',')
-                .map(s => this.escape(s))
-              ).join(',') + ')'
-            );
-          } else if (value.indexOf('..') !== -1) {
-            value = value.split('..');
-            clause = (
-              '(' + key + ' BETWEEN ' +
-              this.escape(value[0]) + ' AND ' +
-              this.escape(value[1]) + ')'
-            );
-          } else if (value.indexOf('*') !== -1 || value.indexOf('?') !== -1) {
-            value = value.replace(/\*/g, '%').replace(/\?/g, '_');
-            clause = key + ' LIKE ' + this.escape(value);
-          } else {
-            clause = key + ' = ' + this.escape(value);
-          }
+          clause = stringClause(key, value, s => this.escape(s));
         }
         result = result ? (result + ' AND ' + clause) : clause;
       }
