@@ -137,7 +137,10 @@ const upgrade = connection => {
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         res = res[0] ? res[0] : false;
         callback(err, res, fields);
       });
@@ -151,7 +154,10 @@ const upgrade = connection => {
         values = [];
       }
       return this.queryRow(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const value = res[Object.keys(res)[0]];
         callback(err, value, fields);
       });
@@ -165,7 +171,10 @@ const upgrade = connection => {
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = [];
         let i, row, keys;
         for (i in res) {
@@ -185,7 +194,10 @@ const upgrade = connection => {
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -206,7 +218,10 @@ const upgrade = connection => {
         values = [];
       }
       return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+          return;
+        }
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -261,11 +276,12 @@ const upgrade = connection => {
     connection.insert = function(table, row, callback) {
       this.fields(table, (err, fields) => {
         if (err) {
-          return callback(
+          callback(
             new Error(
               'Error: Table "' + table + '" not found'
             ), false
           );
+          return;
         }
         fields = Object.keys(fields);
         const rowKeys = Object.keys(row);
@@ -298,7 +314,8 @@ const upgrade = connection => {
         this.fields(table, (err, fields) => {
           if (err) {
             const error = new Error('Error: Table "' + table + '" not found');
-            return callback(error);
+            callback(error);
+            return;
           }
           let where = '';
           const data = [];
@@ -361,7 +378,8 @@ const upgrade = connection => {
       this.fields(table, (err, fields) => {
         if (err) {
           const error = new Error('Error: Table "' + table + '" not found');
-          return callback(error);
+          callback(error);
+          return;
         }
         const rowKeys = Object.keys(row);
         let uniqueKey = '';
