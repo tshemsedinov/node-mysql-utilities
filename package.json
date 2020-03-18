@@ -15,7 +15,8 @@
     "type": "git",
     "url": "https://github.com/tshemsedinov/node-mysql-utilities"
   },
-  "main": "./utilities",
+  "main": "utilities.js",
+  "files": [],
   "scripts": {
     "test": "npm run lint && node example",
     "lint": "eslint ."
@@ -24,9 +25,9 @@
     "node": ">= 6.0.0"
   },
   "dependencies": {
-    "mysql": "^2.17.1"
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "eslint": "^6.6.0"
+    "eslint": "^6.8.0"
   }
 }
