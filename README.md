@@ -8,7 +8,6 @@ result types, introspection and other helpful functionality for
 extracted separately for use with other frameworks.
 
 [![TravisCI](https://travis-ci.org/tshemsedinov/node-mysql-utilities.svg?branch=master)](https://travis-ci.org/tshemsedinov/node-mysql-utilities)
-[![bitHound](https://www.bithound.io/github/tshemsedinov/node-mysql-utilities/badges/score.svg)](https://www.bithound.io/github/tshemsedinov/node-mysql-utilities)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/23e7143d77a0484983cdff30072a5aca)](https://www.codacy.com/app/metarhia/node-mysql-utilities)
 [![NPM Version](https://badge.fury.io/js/mysql-utilities.svg)](https://badge.fury.io/js/mysql-utilities)
 [![NPM Downloads/Month](https://img.shields.io/npm/dm/mysql-utilities.svg)](https://www.npmjs.com/package/mysql-utilities)
