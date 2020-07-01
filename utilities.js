@@ -11,9 +11,9 @@ const escapeIdentifier = (str, quote) => {
 if (typeof Function.prototype.override !== 'function') {
   Function.prototype.override = function(fn) {
     const superFunction = this;
-    return function() {
+    return function(...args) {
       this.inherited = superFunction;
-      return fn.apply(this, arguments);
+      return fn.apply(this, args);
     };
   };
 }
