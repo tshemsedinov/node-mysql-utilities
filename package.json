@@ -28,6 +28,6 @@
     "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "eslint": "^7.4.0"
+    "eslint": "^7.13.0"
   }
 }
