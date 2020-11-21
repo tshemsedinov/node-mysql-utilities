@@ -19,7 +19,8 @@
   "files": [],
   "scripts": {
     "test": "npm run lint && node example",
-    "lint": "eslint ."
+    "lint": "eslint . && prettier \"**/*.js\"",
+    "fmt": "prettier --write \"**/*.js\""
   },
   "engines": {
     "node": ">= 6.0.0"
@@ -28,6 +29,11 @@
     "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "eslint": "^7.13.0"
+    "eslint": "^7.13.0",
+    "prettier": "^2.1.2",
+    "eslint-config-metarhia": "^7.0.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.1.4"
   }
 }
