@@ -19,7 +19,7 @@
   "files": [],
   "scripts": {
     "test": "npm run lint && node example",
-    "lint": "eslint . && prettier -c \"**/*.js\"",
+    "lint": "eslint . && prettier \"**/*.js\"",
     "fmt": "prettier --write \"**/*.js\""
   },
   "engines": {
