@@ -22,8 +22,7 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
  - OS: [e.g. Fedora 30 64-bit]
  - Node.js version [e.g. 14.15.1]
- - PostgeSQL version [e.g. 12.5]
- - pg library version [e.g. 8.5.1]
+ - MySQL version
 
 **Additional context**
 Add any other context about the problem here.
