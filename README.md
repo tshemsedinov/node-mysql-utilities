@@ -781,4 +781,4 @@ connection.delete('Language', { LanguageSign: 'TT' }, (err, affectedRows) => {
 
 Dual licensed under the MIT or RUMI licenses.
 
-Copyright (c) 2012-2020 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
+Copyright (c) 2012-2021 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
