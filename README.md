@@ -15,7 +15,6 @@ extracted separately for use with other frameworks.
 
 ![impress logo](http://habrastorage.org/storage3/747/830/b17/747830b1782bd95f28b8d05eff8e05d9.jpg)
 
-
 ## Installation
 
 ```bash
@@ -24,41 +23,41 @@ $ npm install mysql-utilities
 
 ## Features
 
-  - MySQL Data Access Methods
-    - Query selecting single row: connection.queryRow(sql, values, callback)
-    - Query selecting scalar (single value): connection.queryValue(sql, values, callback)
-    - Query selecting column into array: connection.queryCol(sql, values, callback)
-    - Query selecting hash of records: connection.queryHash(sql, values, callback)
-    - Query selecting key/value hash: connection.queryKeyValue(sql, values, callback)
-  - MySQL Introspection Methods
-    - Get primary key metadata: connection.primary(table, callback)
-    - Get foreign key metadata: connection.foreign(table, callback)
-    - Get table constraints metadata: connection.constraints(table, callback)
-    - Get table fields metadata: connection.fields(table, callback)
-    - Get connection databases array: connection.databases(callback)
-    - Get database tables list for current db: connection.tables(callback)
-    - Get database tables list for given db: connection.databaseTables(database, callback)
-    - Get table metadata: connection.tableInfo(table, callback)
-    - Get table indexes metadata: connection.indexes(table, callback)
-    - Get server process list: connection.processes(callback)
-    - Get server global variables: connection.globalVariables(callback)
-    - Get server global status: connection.globalStatus(callback)
-    - Get database users: connection.users(callback)
-  - MySQL SQL Statements Autogenerating Methods
-    - Selecting record(s): connection.select(table, whereFilter, callback)
-    - Inserting record: connection.insert(table, row, callback)
-    - Updating record: connection.update(table, row, where, callback)
-    - Inserting or selecting record: connection.upsert(table, row, callback)
-    - Count records with filter: connection.count(table, whereFilter, callback)
-    - Delete record(s): connection.delete(table, whereFilter, callback)
-  - Events
-    - Catch any query execution: connection.on('query', function(err, res, fields, query) {});
-    - Catch errors: connection.on('error', function(err, query) {});
-    - Catch slow query execution: connection.on('slow', function(err, res, fields, query, executionTime) {});
+- MySQL Data Access Methods
+  - Query selecting single row: connection.queryRow(sql, values, callback)
+  - Query selecting scalar (single value): connection.queryValue(sql, values, callback)
+  - Query selecting column into array: connection.queryCol(sql, values, callback)
+  - Query selecting hash of records: connection.queryHash(sql, values, callback)
+  - Query selecting key/value hash: connection.queryKeyValue(sql, values, callback)
+- MySQL Introspection Methods
+  - Get primary key metadata: connection.primary(table, callback)
+  - Get foreign key metadata: connection.foreign(table, callback)
+  - Get table constraints metadata: connection.constraints(table, callback)
+  - Get table fields metadata: connection.fields(table, callback)
+  - Get connection databases array: connection.databases(callback)
+  - Get database tables list for current db: connection.tables(callback)
+  - Get database tables list for given db: connection.databaseTables(database, callback)
+  - Get table metadata: connection.tableInfo(table, callback)
+  - Get table indexes metadata: connection.indexes(table, callback)
+  - Get server process list: connection.processes(callback)
+  - Get server global variables: connection.globalVariables(callback)
+  - Get server global status: connection.globalStatus(callback)
+  - Get database users: connection.users(callback)
+- MySQL SQL Statements Autogenerating Methods
+  - Selecting record(s): connection.select(table, whereFilter, callback)
+  - Inserting record: connection.insert(table, row, callback)
+  - Updating record: connection.update(table, row, where, callback)
+  - Inserting or selecting record: connection.upsert(table, row, callback)
+  - Count records with filter: connection.count(table, whereFilter, callback)
+  - Delete record(s): connection.delete(table, whereFilter, callback)
+- Events
+  - Catch any query execution: connection.on('query', function(err, res, fields, query) {});
+  - Catch errors: connection.on('error', function(err, query) {});
+  - Catch slow query execution: connection.on('slow', function(err, res, fields, query, executionTime) {});
 
 ## Initialization
 
-  Utilities can be attached to connection using mix-ins:
+Utilities can be attached to connection using mix-ins:
 
 ```js
 // Library dependencies
@@ -69,7 +68,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'userName',
   password: 'secret',
-  database: 'databaseName'
+  database: 'databaseName',
 });
 
 connection.connect();
@@ -82,7 +81,8 @@ mysqlUtilities.introspection(connection);
 
 // Do something using utilities
 connection.queryRow(
-  'SELECT * FROM _Language where LanguageId=?', [3],
+  'SELECT * FROM _Language where LanguageId=?',
+  [3],
   (err, row) => {
     console.dir({ queryRow: row });
   }
@@ -95,15 +95,19 @@ connection.end();
 ## Examples
 
 Single row selection: connection.queryRow(sql, values, callback) returns hash as callback second parameter, field names becomes hash keys.
+
 ```js
 connection.queryRow(
-  'SELECT * FROM Language where LanguageId=?', [3],
+  'SELECT * FROM Language where LanguageId=?',
+  [3],
   (err, row) => {
     console.dir({ queryRow: row });
   }
 );
 ```
+
 Output:
+
 ```js
 queryRow: {
   LanguageId: 3,
@@ -114,44 +118,54 @@ queryRow: {
 }
 ```
 
-Single value selection: connection.queryValue(sql, values, callback) returns single value as callback second parameter (instead of array in array). For example, for Id selection by name with LIMIT 1 or count(*), max(field) etc.
+Single value selection: connection.queryValue(sql, values, callback) returns single value as callback second parameter (instead of array in array). For example, for Id selection by name with LIMIT 1 or count(\*), max(field) etc.
+
 ```js
 connection.queryValue(
-  'SELECT LanguageName FROM Language where LanguageId=?', [8],
+  'SELECT LanguageName FROM Language where LanguageId=?',
+  [8],
   (err, name) => {
     console.dir({ queryValue: name });
   }
 );
 ```
+
 Output:
+
 ```js
-{ queryValue: 'Italiano' }
+{
+  queryValue: 'Italiano';
+}
 ```
 
 Single column selection: connection.queryCol(sql, values, callback) returns array as callback second parameter.
+
 ```js
-connection.queryCol(
-  'SELECT LanguageSign FROM Language', [],
-  (err, result) => {
-    console.dir({ queryCal: result });
-  }
-);
+connection.queryCol('SELECT LanguageSign FROM Language', [], (err, result) => {
+  console.dir({ queryCal: result });
+});
 ```
+
 Output:
+
 ```js
-queryArray: [ 'de', 'en', 'es', 'fr', 'it', 'pl', 'ru', 'ua' ]
+queryArray: ['de', 'en', 'es', 'fr', 'it', 'pl', 'ru', 'ua'];
 ```
 
 Hash selection: connection.queryHash(sql, values, callback) returns hash as callback second parameter, hash keyed by first field values from SQL statement.
+
 ```js
 connection.queryHash(
-  'SELECT LanguageSign, LanguageId, LanguageName, Caption, LanguageISO FROM Language', [],
+  'SELECT LanguageSign, LanguageId, LanguageName, Caption, LanguageISO FROM Language',
+  [],
   (err, result) => {
     console.dir({ queryHash: result });
   }
 );
 ```
+
 Output:
+
 ```js
 queryHash: {
   en: {
@@ -183,15 +197,19 @@ queryHash: {
 ```
 
 Key/value pair selection: connection.queryKeyValue(sql, values, callback) returns hash as callback second parameter, hash keyed by first field, values filled by second field.
+
 ```js
 connection.queryKeyValue(
-  'SELECT LanguageISO, LanguageName FROM Language', [],
+  'SELECT LanguageISO, LanguageName FROM Language',
+  [],
   (err, keyValue) => {
     console.dir({ queryKeyValue: keyValue });
   }
 );
 ```
+
 Output:
+
 ```js
 keyValue: {
   en: 'English',
@@ -206,12 +224,15 @@ keyValue: {
 ```
 
 Get primary key list with metadata: connection.primary(table, callback) returns metadata as callback second parameter.
+
 ```js
 connection.primary('Language', (err, primary) => {
   console.dir({ primary });
 });
 ```
+
 Output:
+
 ```js
 primary: {
   Table: 'language',
@@ -231,12 +252,15 @@ primary: {
 ```
 
 Get foreign key list with metadata: connection.foreign(table, callback) returns metadata as callback second parameter.
+
 ```js
 connection.foreign('TemplateCaption', (err, foreign) => {
   console.dir({ foreign });
 });
 ```
+
 Output:
+
 ```js
 foreign: {
   fkTemplateCaptionLanguage: {
@@ -245,7 +269,7 @@ foreign: {
     ORDINAL_POSITION: 1,
     POSITION_IN_UNIQUE_CONSTRAINT: 1,
     REFERENCED_TABLE_NAME: 'language',
-    REFERENCED_COLUMN_NAME: 'LanguageId' }, 
+    REFERENCED_COLUMN_NAME: 'LanguageId' },
   fkTemplateCaptionTemplate: {
     CONSTRAINT_NAME: 'fkTemplateCaptionTemplate',
     COLUMN_NAME: 'TemplateId',
@@ -258,12 +282,15 @@ foreign: {
 ```
 
 Referential constraints list with metadata: connection.constraints(table, callback).
+
 ```js
 connection.constraints('TemplateCaption', (err, constraints) => {
   console.dir({ constraints });
 });
 ```
+
 Output:
+
 ```js
 constraints: {
   fkTemplateCaptionLanguage: {
@@ -285,12 +312,15 @@ constraints: {
 ```
 
 Get table fields with metadata: connection.fields(table, callback).
+
 ```js
 connection.fields('Language', (err, fields) => {
   console.dir({ fields });
 });
 ```
+
 Output:
+
 ```js
 fields: {
   LanguageId: {
@@ -318,23 +348,35 @@ fields: {
 ```
 
 Get database list for current connection: connection.databases(callback).
+
 ```js
 connection.databases((err, databases) => {
   console.dir({ databases });
 });
 ```
+
 Output:
+
 ```js
-databases: [ 'information_schema', 'mezha', 'mysql', 'performance_schema', 'test' ]
+databases: [
+  'information_schema',
+  'mezha',
+  'mysql',
+  'performance_schema',
+  'test',
+];
 ```
 
 Get table list for current database: connection.tables(callback).
+
 ```js
 connection.tables((err, tables) => {
   console.dir({ tables });
 });
 ```
+
 Output:
+
 ```js
 tables: {
   Language: {
@@ -362,12 +404,15 @@ tables: {
 ```
 
 Get table list for specified database: connection.databaseTables(database, callback).
+
 ```js
 connection.databaseTables('databaseName', (err, tables) => {
   console.dir({ databaseTables: tables });
 });
 ```
+
 Output:
+
 ```js
 tables: {
   Language: {
@@ -395,12 +440,15 @@ tables: {
 ```
 
 Get table metadata: connection.tableInfo(table, callback).
+
 ```js
 connection.tableInfo('Language', (err, info) => {
   console.dir({ tableInfo: info });
 });
 ```
+
 Output:
+
 ```js
 tableInfo: {
   Name: 'language',
@@ -425,12 +473,15 @@ tableInfo: {
 ```
 
 Get table indexes metadata: connection.indexes(table, callback).
+
 ```js
-connection.indexes('Language', function(err, info) {
+connection.indexes('Language', function (err, info) {
   console.dir({ tableInfo: info });
 });
 ```
+
 Output:
+
 ```js
 indexes: {
   PRIMARY: {
@@ -466,41 +517,50 @@ indexes: {
 ```
 
 Get MySQL process list: connection.processes(callback).
+
 ```js
-connection.processes(function(err, processes) {
+connection.processes(function (err, processes) {
   console.dir({ processes });
 });
 ```
+
 Output:
+
 ```js
-processes: [ {
-  ID: 62,
-  USER: 'mezha',
-  HOST: 'localhost:14188',
-  DB: 'mezha',
-  COMMAND: 'Query',
-  TIME: 0,
-  STATE: 'executing',
-  INFO: 'SELECT * FROM information_schema.PROCESSLIST'
-}, {
-  ID: 33,
-  USER: 'root',
-  HOST: 'localhost:39589',
-  DB: null,
-  COMMAND: 'Sleep',
-  TIME: 1,
-  STATE: '',
-  INFO: null
-} ]
+processes: [
+  {
+    ID: 62,
+    USER: 'mezha',
+    HOST: 'localhost:14188',
+    DB: 'mezha',
+    COMMAND: 'Query',
+    TIME: 0,
+    STATE: 'executing',
+    INFO: 'SELECT * FROM information_schema.PROCESSLIST',
+  },
+  {
+    ID: 33,
+    USER: 'root',
+    HOST: 'localhost:39589',
+    DB: null,
+    COMMAND: 'Sleep',
+    TIME: 1,
+    STATE: '',
+    INFO: null,
+  },
+];
 ```
 
 Get MySQL global variables: connection.globalVariables(callback)
+
 ```js
 connection.globalVariables((err, globalVariables) => {
   console.dir({ globalVariables });
 });
 ```
+
 Output:
+
 ```js
 globalVariables: {
   MAX_PREPARED_STMT_COUNT: '16382',
@@ -515,12 +575,15 @@ globalVariables: {
 ```
 
 Get MySQL global status: connection.globalStatus(callback)
+
 ```js
 connection.globalStatus((err, globalStatus) => {
   console.dir({ globalStatus });
 });
 ```
+
 Output:
+
 ```js
 globalStatus: {
   ABORTED_CLIENTS: '54',
@@ -537,12 +600,15 @@ globalStatus: {
 ```
 
 Get MySQL user list: connection.users(callback)
+
 ```js
 connection.users((err, users) => {
   console.dir({ users });
 });
 ```
+
 Output:
+
 ```js
 users: [
   {
@@ -593,6 +659,7 @@ users: [
 ```
 
 Generate MySQL WHERE statement: connection.where(conditions), works synchronously, no callback. Returns WHERE statement for given JSON-style conditions.
+
 ```js
 const where = connection.where({
   id: 5,
@@ -601,17 +668,19 @@ const where = connection.where({
   level: '<=3',
   sn: '*str?',
   label: 'str',
-  code: '(1,2,4,10,11)'
+  code: '(1,2,4,10,11)',
 });
 console.dir(where);
-// Output: "id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND 
+// Output: "id = 5 AND year > '2010' AND (price BETWEEN '100' AND '200') AND
 // level <= '3' AND sn LIKE '%str_' AND label = 'str' AND code IN (1,2,4,10,11)"
 ```
 
 Generate SELECT statement: connection.select(table, whereFilter, orderBy, callback)
+
 ```js
 connection.select(
-  'Language', '*',
+  'Language',
+  '*',
   { LanguageId: '1..3' },
   { LanguageId: 'desc' },
   (err, results) => {
@@ -621,13 +690,15 @@ connection.select(
 ```
 
 Generate INSERT statement: connection.insert(table, row, callback)
+
 ```js
 connection.insert(
-  'Language', {
+  'Language',
+  {
     LanguageName: 'Tatar',
     LanguageSign: 'TT',
     LanguageISO: 'TT',
-    Caption:'Tatar'
+    Caption: 'Tatar',
   },
   (err, recordId) => {
     console.dir({ insert: recordId });
@@ -636,14 +707,16 @@ connection.insert(
 ```
 
 Generate UPDATE statement: connection.update(table, row, callback)
+
 ```js
 connection.update(
-  'Language', {
+  'Language',
+  {
     LanguageId: 25,
     LanguageName: 'Tatarca',
     LanguageSign: 'TT',
     LanguageISO: 'TT',
-    Caption: 'Tatarca'
+    Caption: 'Tatarca',
   },
   (err, affectedRows) => {
     console.dir({ update: affectedRows });
@@ -652,6 +725,7 @@ connection.update(
 ```
 
 Generate UPDATE statement with "where": connection.update(table, row, where, callback)
+
 ```js
 connection.update(
   'Language',
@@ -664,53 +738,47 @@ connection.update(
 ```
 
 Generate INSERT statement if record not exists or UPDATE if it exists: connection.upsert(table, row, callback)
+
 ```js
 connection.upsert(
-  'Language', {
+  'Language',
+  {
     LanguageId: 25,
     LanguageName: 'Tatarca',
     LanguageSign: 'TT',
     LanguageISO: 'TT',
-    Caption: 'Tatarca'
-  }, (err, affectedRows) => {
+    Caption: 'Tatarca',
+  },
+  (err, affectedRows) => {
     console.dir({ upsert: affectedRows });
   }
 );
 ```
 
 Get record count: connection.count(table, whereFilter, callback)
+
 ```js
-connection.count(
-  'Language',
-  { LanguageId: '>3' },
-  (err, count) => {
-    console.dir({ count });
-    // count: 9
-  }
-);
+connection.count('Language', { LanguageId: '>3' }, (err, count) => {
+  console.dir({ count });
+  // count: 9
+});
 ```
 
 Generate DELETE statement: connection.delete(table, whereFilter, callback)
+
 ```js
-connection.delete(
-  'Language',
-  { LanguageSign: 'TT' },
-  (err, affectedRows) => {
-    console.dir({ delete: affectedRows });
-  }
-);
+connection.delete('Language', { LanguageSign: 'TT' }, (err, affectedRows) => {
+  console.dir({ delete: affectedRows });
+});
 ```
 
 ## Contributors
 
-  - Timur Shemsedinov (marcusaurelius)
-  - See github for full contributors list
+- Timur Shemsedinov (marcusaurelius)
+- See github for full contributors list
 
 ## License
 
 Dual licensed under the MIT or RUMI licenses.
 
 Copyright (c) 2012-2020 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
-
-RUMI License: Everything that you want, you are already that. 
-// Jalal ad-Din Muhammad Rumi

@@ -19,8 +19,8 @@
   "files": [],
   "scripts": {
     "test": "npm run lint && node example",
-    "lint": "eslint . && prettier \"**/*.js\"",
-    "fmt": "prettier --write \"**/*.js\""
+    "lint": "eslint . && prettier -c \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\"",
+    "fmt": "prettier --write \"**/*.js\" \"**/*.json\" \"**/*.md\" \"**/*.yml\""
   },
   "engines": {
     "node": ">= 6.0.0"
