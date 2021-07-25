@@ -772,13 +772,8 @@ connection.delete('Language', { LanguageSign: 'TT' }, (err, affectedRows) => {
 });
 ```
 
-## Contributors
+## License & Contributors
 
-- Timur Shemsedinov (marcusaurelius)
-- See github for full contributors list
-
-## License
-
-Dual licensed under the MIT or RUMI licenses.
-
-Copyright (c) 2012-2021 MetaSystems &lt;timur.shemsedinov@gmail.com&gt;
+Copyright (c) 2012-2021 Metarhia &lt;timur.shemsedinov@gmail.com&gt;
+See github for full [contributors list](https://github.com/tshemsedinov/node-mysql-utilities/graphs/contributors).
+Node MySql Utilities is [MIT licensed](./LICENSE).
