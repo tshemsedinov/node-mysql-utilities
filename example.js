@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-disable import/no-unresolved */
 const mysql = require('mysql');
 const mysqlUtilities = require('./utilities');
 
