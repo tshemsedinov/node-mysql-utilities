@@ -1,7 +1,6 @@
 'use strict';
-
 /* eslint-disable no-use-before-define */
-/* eslint-disable import/no-unresolved */
+
 const { createQuery } = require('mysql');
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
