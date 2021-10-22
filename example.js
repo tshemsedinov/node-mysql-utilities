@@ -105,6 +105,16 @@ connection.query(
   }
 );
 
+connection.query(
+  {
+    sql: 'SELECT * FROM _Language where LanguageId > ?',
+    values: [2],
+  },
+  (err, results) => {
+    console.dir({ query: results });
+  }
+);
+
 connection.queryRow(
   'SELECT * FROM _Language where LanguageId = ?',
   [3],
@@ -113,9 +123,30 @@ connection.queryRow(
   }
 );
 
+connection.queryRow(
+  {
+    sql: 'SELECT * FROM _Language where LanguageId = ?',
+    values: [3],
+    timeout: 2000,
+  },
+  (err, row) => {
+    console.dir({ queryRow: row });
+  }
+);
+
 connection.queryValue(
   'SELECT LanguageName FROM _Language where LanguageId = ?',
   [8],
+  (err, name) => {
+    console.dir({ queryValue: name });
+  }
+);
+
+connection.queryValue(
+  {
+    sql: 'SELECT LanguageName FROM _Language where LanguageId = ?',
+    values: [8],
+  },
   (err, name) => {
     console.dir({ queryValue: name });
   }
@@ -130,13 +161,46 @@ connection.queryHash(
   }
 );
 
+connection.queryHash(
+  {
+    sql:
+      'SELECT LanguageSign, LanguageId, LanguageName, Caption, LanguageISO ' +
+      'FROM _Language',
+    values: [],
+  },
+  (err, arr) => {
+    console.dir({ queryHash: arr });
+  }
+);
+
 connection.queryCol('SELECT LanguageSign FROM _Language', [], (err, arr) => {
   console.dir({ queryCol: arr });
 });
 
+connection.queryCol(
+  {
+    sql: 'SELECT LanguageSign FROM _Language',
+    values: [],
+  },
+  (err, arr) => {
+    console.dir({ queryCol: arr });
+  }
+);
+
 connection.queryKeyValue(
   'SELECT LanguageISO, LanguageName FROM _Language',
   [],
+  (err, keyValue) => {
+    console.dir({ queryKeyValue: keyValue });
+  }
+);
+
+connection.queryKeyValue(
+  {
+    sql: 'SELECT LanguageISO, LanguageName FROM _Language',
+    values: [],
+    timeout: 1000,
+  },
   (err, keyValue) => {
     console.dir({ queryKeyValue: keyValue });
   }

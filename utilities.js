@@ -1,4 +1,7 @@
 'use strict';
+/* eslint-disable no-use-before-define */
+
+const { createQuery } = require('mysql');
 
 const identifierRegexp = /^[0-9,a-z,A-Z_.]*$/;
 
@@ -51,20 +54,24 @@ const upgrade = connection => {
       values,
       callback
     ) {
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
       const startTime = new Date().getTime();
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      const query = this.inherited(sql, values, (err, res, fields) => {
+
+      const callbackWrapper = (err, res, fields) => {
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
         connection.emit('query', err, res, fields, query);
         if (connection.slowTime && executionTime >= connection.slowTime) {
           connection.emit('slow', err, res, fields, query, executionTime);
         }
-        if (callback) callback(err, res, fields);
-      });
+        if (userCallback) userCallback(err, res, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      const query = this.inherited(queryOptions);
       return query;
     });
 
@@ -120,40 +127,45 @@ const upgrade = connection => {
     // Returns single row as associative array of fields
     //
     connection.queryRow = function (sql, values, callback) {
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
+      const callbackWrapper = (err, res, fields) => {
+        if (err) return userCallback(err);
         res = res[0] ? res[0] : false;
-        callback(err, res, fields);
-      });
+        userCallback(err, res, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      return this.query(queryOptions);
     };
 
     // Returns single value (scalar)
     //
     connection.queryValue = function (sql, values, callback) {
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      return this.queryRow(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
+      const callbackWrapper = (err, res, fields) => {
+        if (err) return userCallback(err);
         const value = res[Object.keys(res)[0]];
-        callback(err, value, fields);
-      });
+        userCallback(err, value, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      return this.queryRow(queryOptions);
     };
 
     // Query returning array of column field values
     //
     connection.queryCol = function (sql, values, callback) {
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
+      const callbackWrapper = (err, res, fields) => {
+        if (err) return userCallback(err);
         const result = [];
         let i, row, keys;
         for (i in res) {
@@ -161,19 +173,22 @@ const upgrade = connection => {
           keys = Object.keys(row);
           result.push(row[keys[0]]);
         }
-        callback(err, result, fields);
-      });
+        userCallback(err, result, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      return this.query(queryOptions);
     };
 
     // Query returning hash (associative array), first field will be array key
     //
     connection.queryHash = function (sql, values, callback) {
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
+      const callbackWrapper = (err, res, fields) => {
+        if (err) return userCallback(err);
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -181,20 +196,23 @@ const upgrade = connection => {
           keys = Object.keys(row);
           result[row[keys[0]]] = row;
         }
-        callback(err, result, fields);
-      });
+        userCallback(err, result, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      return this.query(queryOptions);
     };
 
     // Query returning key-value array,
     // first field of query will be key and second will be value
     //
     connection.queryKeyValue = function (sql, values, callback) {
-      if (typeof values === 'function') {
-        callback = values;
-        values = [];
-      }
-      return this.query(sql, values, (err, res, fields) => {
-        if (err) return callback(err);
+      const queryOptions = createQuery(sql, values, callback);
+      const userCallback = queryOptions._callback;
+
+      const callbackWrapper = (err, res, fields) => {
+        if (err) return userCallback(err);
         const result = {};
         let i, row, keys;
         for (i in res) {
@@ -202,8 +220,12 @@ const upgrade = connection => {
           keys = Object.keys(row);
           result[row[keys[0]]] = row[keys[1]];
         }
-        callback(err, result, fields);
-      });
+        userCallback(err, result, fields);
+      };
+
+      queryOptions._callback = callbackWrapper;
+
+      return this.query(queryOptions);
     };
 
     // SELECT SQL statement generator
