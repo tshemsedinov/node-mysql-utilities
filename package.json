@@ -1,6 +1,6 @@
 {
   "name": "mysql-utilities",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "author": "Timur Shemsedinov <timur.shemsedinov@gmail.com>",
   "description": "Utilities for node-mysql driver with specialized result types, introspection and other helpful functionality.",
   "license": "MIT",
@@ -29,11 +29,11 @@
     "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "eslint": "^8.16.0",
-    "eslint-config-metarhia": "^7.0.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.6.2"
+    "eslint": "^8.34.0",
+    "eslint-config-metarhia": "^8.1.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.4"
   }
 }
