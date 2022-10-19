@@ -774,6 +774,6 @@ connection.delete('Language', { LanguageSign: 'TT' }, (err, affectedRows) => {
 
 ## License & Contributors
 
-Copyright (c) 2012-2021 Metarhia &lt;timur.shemsedinov@gmail.com&gt;
+Copyright (c) 2012-2022 Metarhia &lt;timur.shemsedinov@gmail.com&gt;
 See github for full [contributors list](https://github.com/tshemsedinov/node-mysql-utilities/graphs/contributors).
 Node MySql Utilities is [MIT licensed](./LICENSE).
