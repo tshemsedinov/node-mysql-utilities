@@ -29,11 +29,11 @@
     "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "eslint": "^8.16.0",
-    "eslint-config-metarhia": "^7.0.1",
+    "eslint": "^8.1.0",
+    "eslint-config-metarhia": "^8.1.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.6.2"
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1"
   }
 }
