@@ -7,8 +7,7 @@ result types, introspection and other helpful functionality for
 [Impress](https://npmjs.org/package/impress) Application Server and
 extracted separately for use with other frameworks.
 
-[![TravisCI](https://travis-ci.org/tshemsedinov/node-mysql-utilities.svg?branch=master)](https://travis-ci.org/tshemsedinov/node-mysql-utilities)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/23e7143d77a0484983cdff30072a5aca)](https://www.codacy.com/app/metarhia/node-mysql-utilities)
+[![CI Status](https://github.com/tshemsedinov/node-mysql-utilities/workflows/Testing%20CI/badge.svg)](https://github.com/tshemsedinov/node-mysql-utilities/actions?query=workflow%3A%22Testing+CI%22+branch%3Amaster)
 [![NPM Version](https://badge.fury.io/js/mysql-utilities.svg)](https://badge.fury.io/js/mysql-utilities)
 [![NPM Downloads/Month](https://img.shields.io/npm/dm/mysql-utilities.svg)](https://www.npmjs.com/package/mysql-utilities)
 [![NPM Downloads](https://img.shields.io/npm/dt/mysql-utilities.svg)](https://www.npmjs.com/package/mysql-utilities)
