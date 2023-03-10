@@ -397,7 +397,7 @@ const upgrade = connection => {
               this.escape(row[uniqueKey]),
             [],
             (err, count) => {
-              if (count === 1) this.update(table, row, callback);
+              if (parseInt(count, 10) === 1) this.update(table, row, callback);
               else this.insert(table, row, callback);
             }
           );
